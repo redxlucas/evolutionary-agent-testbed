@@ -1,8 +1,8 @@
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
-from configs.environment_config import DEFAULT_MAP_SIZE
+from src.configs.environment_config import DEFAULT_MAP_SIZE
 
-class FrozenLakeEnvironment():
+class FrozenLakeEnvironment:
     """
     Classe responsável por encapsular a interação com o ambiente
     FrozenLake disponibilizado pelo Gymnasium.

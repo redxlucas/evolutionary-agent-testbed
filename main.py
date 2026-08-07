@@ -1,4 +1,6 @@
-from environment.frozen_lake_environment import FrozenLakeEnvironment
+from src.agents.agent import Agent
+from src.agents.genome import Genome
+from src.environment.frozen_lake_environment import FrozenLakeEnvironment
 
 import pygame
 
@@ -17,46 +19,28 @@ ACTION_NAMES = {
     3: "UP"
 }
 
+agent = Agent(genome=Genome.random(10))
+
+print(agent.genome.genes)
+
 running = True
 
-while running and not done:
+while not done:
 
-    for event in pygame.event.get():
+    previous_state = state
 
-        if event.type == pygame.QUIT:
-            running = False
+    acao = agent.act()
 
-        if event.type == pygame.KEYDOWN:
+    print(f"\nAção escolhida: {ACTION_NAMES[acao]}")
 
-            action = None
+    state, reward, done = environment.step(acao)
 
-            if event.key == pygame.K_LEFT:
-                action = 0
+    print(f"Estado anterior: {previous_state}")
+    print(f"Novo estado: {state}")
+    print(f"Reward: {reward}")
+    print(f"Done: {done}")
 
-            elif event.key == pygame.K_DOWN:
-                action = 1
-
-            elif event.key == pygame.K_RIGHT:
-                action = 2
-
-            elif event.key == pygame.K_UP:
-                action = 3
-
-            if action is not None:
-
-                print(f"\nAção escolhida: {ACTION_NAMES[action]}")
-
-                previous_state = state
-
-                state, reward, done = environment.step(action)
-
-                print(f"Estado anterior: {previous_state}")
-                print(f"Novo estado: {state}")
-                print(f"Reward: {reward}")
-                print(f"Done: {done}")
-
-                if done:
-                    print("\nFim do episódio!")
+    input("")
 
 pygame.quit()
 environment.close()
