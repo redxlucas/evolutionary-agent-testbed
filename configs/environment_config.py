@@ -1,0 +1,2 @@
+DEFAULT_MAP_SIZE = "4x4"
+

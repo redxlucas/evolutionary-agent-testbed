@@ -1,4 +1,6 @@
 import gymnasium as gym
+from gymnasium.envs.toy_text.frozen_lake import generate_random_map
+from configs.environment_config import DEFAULT_MAP_SIZE
 
 class FrozenLakeEnvironment():
     """
@@ -6,11 +8,13 @@ class FrozenLakeEnvironment():
     FrozenLake disponibilizado pelo Gymnasium.
     """
 
-    def __init__(self):
+    def __init__(self, desc=None, is_slippery=False):
         self.env = gym.make(
             "FrozenLake-v1",
             render_mode="human",
-            is_slippery=False
+            is_slippery=is_slippery,
+            desc=desc,
+            map_name=DEFAULT_MAP_SIZE
         )
 
     def reset(self):
