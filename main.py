@@ -1,16 +1,9 @@
 from src.agents.agent import Agent
 from src.agents.genome import Genome
+from src.simulation.simulation import Simulation
 from src.environment.frozen_lake_environment import FrozenLakeEnvironment
 
-import pygame
-
 environment = FrozenLakeEnvironment()
-
-state = environment.reset()
-
-done = False
-
-pygame.init()
 
 ACTION_NAMES = {
     0: "LEFT",
@@ -20,27 +13,8 @@ ACTION_NAMES = {
 }
 
 agent = Agent(genome=Genome.random(10))
+simulation = Simulation(agent=agent, environment=environment)
 
-print(agent.genome.genes)
+fitness = simulation.run()
 
-running = True
-
-while not done:
-
-    previous_state = state
-
-    acao = agent.act()
-
-    print(f"\nAção escolhida: {ACTION_NAMES[acao]}")
-
-    state, reward, done = environment.step(acao)
-
-    print(f"Estado anterior: {previous_state}")
-    print(f"Novo estado: {state}")
-    print(f"Reward: {reward}")
-    print(f"Done: {done}")
-
-    input("")
-
-pygame.quit()
-environment.close()
+print(f"Fitness: {fitness}")
