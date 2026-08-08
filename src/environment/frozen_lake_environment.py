@@ -1,6 +1,6 @@
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
-from src.configs.environment_config import DEFAULT_MAP_SIZE
+from config import DEFAULT_MAP_SIZE
 
 class FrozenLakeEnvironment:
     """

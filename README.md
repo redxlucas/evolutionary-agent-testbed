@@ -10,12 +10,11 @@
 ```
 evolutionary-agent-testbed/
 │
-├── agents/ quem aprende;
-├── algorithms/ como aprende;
-├── environment/ onde aprende;
+├── agents/ quem é o indivíduo;
+├── algorithms/ como a população evolui;
+├── environment/ como a população evolui;
+├── simulation/ como uma execução é realizada;
 ├── configs/
-├── utils/
-├── assets/
 │
 ├── main.py
 ├── requirements.txt
@@ -41,3 +40,12 @@ Guarda as coordenadas do agente no mapa (avaliar necessidade).
 ## Fitness
 
 Mede o quão proxímo o agente chegou próximo do objetivo.
+
+- Population size: 20 agentes
+- Genome length: 20 genes
+- Max steps: 20
+- Episodes per agent: 1
+- Selection: 5 melhores
+- Crossover: 15 descendentes
+- Mutation rate: 5%
+- Generations: 100

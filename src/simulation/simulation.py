@@ -1,6 +1,5 @@
-from src.agents.agent import Agent
-from src.environment.frozen_lake_environment import FrozenLakeEnvironment
-
+from agents import Agent
+from environment import FrozenLakeEnvironment
 
 class Simulation:
 

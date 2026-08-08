@@ -1,7 +1,6 @@
-from src.agents.agent import Agent
-from src.agents.genome import Genome
-from src.simulation.simulation import Simulation
-from src.environment.frozen_lake_environment import FrozenLakeEnvironment
+from agents import *
+from simulation import Simulation
+from environment import FrozenLakeEnvironment
 
 environment = FrozenLakeEnvironment()
 

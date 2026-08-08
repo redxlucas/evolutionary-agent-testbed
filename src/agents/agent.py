@@ -1,4 +1,4 @@
-from src.agents.genome import Genome
+from .genome import Genome
 
 class Agent:
     """
