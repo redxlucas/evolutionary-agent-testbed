@@ -1,9 +1,9 @@
 # evolutionary-agent-testbed
 
-- `python -m .venv venv`
-- `python -m pip install --upgrade pip`
-- `pip install gymnasium minigrid pygame`
+- `python -m venv .venv`
 - `source .venv/Scripts/activate`
+- `python -m pip install --upgrade pip`
+- `pip install gymnasium pygame`
 
 ---
 
