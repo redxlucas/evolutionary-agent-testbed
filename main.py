@@ -1,6 +1,6 @@
-from algorithms import GeneticAlgorithm
-from algorithms import Population
-from algorithms import FitnessEvaluator
+from evolution import GeneticAlgorithm
+from evolution import Population
+from evolution import FitnessEvaluator
 import config
 
 population = Population.random(

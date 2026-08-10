@@ -1,5 +1,5 @@
-from algorithms import FitnessEvaluator
-from algorithms import Population
+from evolution import FitnessEvaluator
+from evolution import Population
 from environment import FrozenLakeEnvironment
 from agents import *
 from simulation import Simulation
@@ -34,5 +34,5 @@ class GeneticAlgorithm:
 
                 fitness = self.fitness_evaluator.evaluate(result)
 
-                print(f"Fitness: {fitness}      | Passos: {result.steps}     | Truncado? {result.truncated}")
+                print(f"Fitness: {round(fitness, 2)}      | Passos: {result.steps}     | Truncado? {result.truncated}")
         
