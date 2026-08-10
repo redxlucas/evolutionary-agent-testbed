@@ -6,3 +6,5 @@ class SimulationResult:
     steps: int
     terminated: bool
     truncated: bool
+    final_position: tuple[int, int]
+    goal_position: tuple[int, int]

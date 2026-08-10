@@ -28,9 +28,14 @@ class Simulation:
             total_reward += reward
             steps += 1
 
+        final_position = self.environment.get_agent_position()
+        goal_position = self.environment.get_goal_position()
+
         return SimulationResult(
             total_reward=total_reward,
             steps=steps,
             terminated=terminated,
             truncated=truncated,
+            final_position=final_position,
+            goal_position=goal_position # faz sentido a simulação saber a posição do objetivo?? 
         )
