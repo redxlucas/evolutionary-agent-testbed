@@ -11,7 +11,7 @@
 evolutionary-agent-testbed/
 │
 ├── agents/ quem é o indivíduo;
-├── algorithms/ como a população evolui;
+├── evolution/ como a população evolui;
 ├── environment/ como a população evolui;
 ├── simulation/ como uma execução é realizada;
 ├── configs/

@@ -1,19 +1,19 @@
-from agents import *
-from simulation import Simulation
-from environment import FrozenLakeEnvironment
+from algorithms import GeneticAlgorithm
+from algorithms import Population
+from algorithms import FitnessEvaluator
+import config
 
-environment = FrozenLakeEnvironment()
+population = Population.random(
+    size=config.POPULATION_SIZE,
+    genome_length=config.GENOME_LENGTH
+)
 
-ACTION_NAMES = {
-    0: "LEFT",
-    1: "DOWN",
-    2: "RIGHT",
-    3: "UP"
-}
+fitness_evaluator = FitnessEvaluator()
 
-agent = Agent(genome=Genome.random(10))
-simulation = Simulation(agent=agent, environment=environment)
+algorithm = GeneticAlgorithm(
+    population=population,
+    fitness_evaluator=fitness_evaluator,
+    generations=config.GENERATIONS,
+)
 
-fitness = simulation.run()
-
-print(f"Fitness: {fitness}")
+algorithm.run()

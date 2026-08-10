@@ -1,2 +1,13 @@
+# Environment
+
 DEFAULT_MAP_SIZE = "4x4"
+RENDER_MODE = None
+
+# Population
+
+POPULATION_SIZE = 10
+GENOME_LENGTH = 50
+
+GENERATIONS = 5
+
 
