@@ -10,21 +10,19 @@ class Agent:
     def __init__(self, genome: Genome):
         self.genome = genome
         self.position = None
-        self.fitness = 0
         self.current_gene = 0
 
     def reset(self, start_position):
         self.position = start_position
         self.fitness = 0
+        self.current_gene = 0
 
     def act(self, observation=None):
         """
         Retorna uma ação baseada no genoma.
         """
+        
         action = self.genome.get_gene(self.current_gene)
         self.current_gene += 1
 
         return action
-
-    def update_fitness(self, reward):
-        self.fitness += reward
