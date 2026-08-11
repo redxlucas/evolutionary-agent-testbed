@@ -12,6 +12,9 @@ class Agent:
         self.position = None
         self.current_gene = 0
 
+    def __repr__(self):
+        return f"Agent(fitness={self.fitness})"
+
     def reset(self, start_position):
         self.position = start_position
         self.fitness = 0

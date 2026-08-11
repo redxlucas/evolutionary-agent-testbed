@@ -14,6 +14,7 @@ algorithm = GeneticAlgorithm(
     population=population,
     fitness_evaluator=fitness_evaluator,
     generations=config.GENERATIONS,
+    selection_size=config.SELECTION_SIZE,
 )
 
 algorithm.run()
