@@ -13,8 +13,8 @@ class GeneticAlgorithm:
         population: Population,
         fitness_evaluator: FitnessEvaluator,
         generations: int,
-        tournament_size,
-        selection_amount
+        tournament_size: int,
+        selection_amount: int
     ):
         self.metrics: list[GenerationMetrics] = []
         self.population = population
@@ -25,7 +25,35 @@ class GeneticAlgorithm:
         )
         self.selection_amount=selection_amount
 
-    def collect_generation_metrics(self, population: Population, generation: int) -> GenerationMetrics:
+    def run(self):
+        for generation in range(self.generations):
+
+            self._evaluate_population()
+
+            parents = self.selection.select(
+                self.population.individuals,
+                amount=self.selection_amount
+            )
+
+            generation_metrics = self._collect_generation_metrics(
+                population=self.population,
+                generation=generation
+            )
+
+            self.metrics.append(generation_metrics)
+
+    def _evaluate_population(self):
+        for agent in self.population.individuals:
+
+            environment = FrozenLakeEnvironment()
+            simulation = Simulation(
+                    agent=agent, 
+                    environment=environment
+            )
+            result = simulation.run()
+            agent.fitness = self.fitness_evaluator.evaluate(result)
+
+    def _collect_generation_metrics(self, population: Population, generation: int) -> GenerationMetrics:
         if not population.individuals:
             raise ValueError("Population cannot be empty.")
 
@@ -47,30 +75,5 @@ class GeneticAlgorithm:
             success_rate=success_rate
         )
 
-    def run(self):
-        for generation in range(self.generations):
 
-            for agent in self.population.individuals:
 
-                environment = FrozenLakeEnvironment()
-
-                simulation = Simulation(
-                    agent=agent, 
-                    environment=environment
-                )
-
-                result = simulation.run()
-
-                agent.fitness = self.fitness_evaluator.evaluate(result)
-
-            parents = self.selection.select(
-                self.population.individuals,
-                amount=self.selection_amount
-            )
-
-            generation_metrics = self.collect_generation_metrics(
-                population=self.population,
-                generation=generation
-            )
-
-            self.metrics.append(generation_metrics)
