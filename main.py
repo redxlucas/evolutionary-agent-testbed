@@ -14,7 +14,15 @@ algorithm = GeneticAlgorithm(
     population=population,
     fitness_evaluator=fitness_evaluator,
     generations=config.GENERATIONS,
-    selection_size=config.SELECTION_SIZE,
+    tournament_size=config.TOURNAMENT_SIZE,
+    selection_amount=config.SELECTION_AMOUNT
 )
 
 algorithm.run()
+
+for i in range(len(algorithm.metrics)):
+    print(f"""Geração: {algorithm.metrics[i].generation}
+Melhor Fitness: {algorithm.metrics[i].best_fitness}
+Média Fitness: {algorithm.metrics[i].average_fitness}
+Pior Fitness: {algorithm.metrics[i].worst_fitness}
+    """)

@@ -1,16 +1,14 @@
 import random
 
-from agents import Agent
 from evolution import Population
-
 
 class Selection:
 
-    def __init__(self, selection_size: int):
-        self.selection_size = selection_size
+    def __init__(self, tournament_size: int):
+        self.tournament_size = tournament_size
 
     def select(self, population: Population, amount: int) -> Population: # seleção baseada no tournament selection
-        if self.selection_size > len(population):
+        if self.tournament_size > len(population):
             raise ValueError(
                 "Tournament size cannot be greater than population size."
         )
@@ -25,7 +23,7 @@ class Selection:
         for _ in range(amount):
             tournament = random.sample(
                 population,
-                self.selection_size
+                self.tournament_size
             )
 
             winner = max(
