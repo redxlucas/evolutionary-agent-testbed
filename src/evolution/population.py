@@ -8,13 +8,13 @@ class Population:
         self.individuals = individuals
 
     def __len__(self):
-        return len(self.agents)
+        return len(self.individuals)
 
     def __iter__(self):
-        return iter(self.agents)
+        return iter(self.individuals)
 
     @classmethod
     def random(cls, size: int, genome_length: int):
-        agents = [Agent(genome=Genome.random(genome_length)) for _ in range(size)]
+        individuals = [Agent(genome=Genome.random(genome_length)) for _ in range(size)]
 
-        return cls(agents)
+        return cls(individuals)

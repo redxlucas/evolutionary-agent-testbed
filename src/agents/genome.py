@@ -17,6 +17,9 @@ class Genome:
     def get_gene(self, index):
         return self.genes[index]
 
+    def copy(self):
+        return Genome(self.genes.copy())
+
     @classmethod
     def random(cls, length: int) -> Genome:
         genes = [random.randrange(NUM_MOVEMENTS) for _ in range(length)]
