@@ -62,7 +62,9 @@ class GeneticAlgorithm:
                     environment=environment
             )
             result = simulation.run()
+
             agent.fitness = self.fitness_evaluator.evaluate(result)
+            agent.success = result.final_position == result.goal_position
 
     def _collect_generation_metrics(self, population: Population, generation: int) -> GenerationMetrics:
         if not population.individuals:
@@ -73,10 +75,15 @@ class GeneticAlgorithm:
             for agent in population.individuals
         ]
 
+        success_count = sum(
+            agent.success
+            for agent in population.individuals
+        )
+
         best_fitness = max(fitness_values)
-        average_fitness = sum(fitness_values) / len(fitness_values)
+        average_fitness = sum(fitness_values) / len(population)
         worst_fitness = min(fitness_values)
-        success_rate = 0.0 # adicionar futuramente
+        success_rate = success_count / len(population)
 
         return GenerationMetrics(
             generation=generation,

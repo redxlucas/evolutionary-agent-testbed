@@ -25,4 +25,5 @@ for i in range(len(algorithm.metrics)):
 Melhor Fitness: {algorithm.metrics[i].best_fitness}
 Média Fitness: {algorithm.metrics[i].average_fitness}
 Pior Fitness: {algorithm.metrics[i].worst_fitness}
+% de Sucesso: {algorithm.metrics[i].success_rate}
     """)

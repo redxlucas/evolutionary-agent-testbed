@@ -18,6 +18,7 @@ class Agent:
     def reset(self, start_position):
         self.position = start_position
         self.fitness = 0
+        self.success = False
         self.current_gene = 0
 
     def act(self, observation=None):
