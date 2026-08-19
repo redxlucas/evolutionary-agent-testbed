@@ -1,8 +1,9 @@
 # Environment
 
-DEFAULT_MAP_SIZE = "8x8"
+DEFAULT_MAP_SIZE = "4x4"
 # RENDER_MODE = "human"
 RENDER_MODE = None
+NUM_MOVEMENTS = 4
 
 # Population
 
@@ -11,9 +12,15 @@ GENOME_LENGTH = 100
 
 GENERATIONS = 50
 
+# -- Selection --
+
 TOURNAMENT_SIZE = 3
-SELECTION_AMOUNT = 10
+SELECTION_AMOUNT = 20
 
 # -- Crossover --
 
 CROSSOVER_RATE = 1.0
+
+# -- Mutation --
+
+MUTATION_RATE = 0.02

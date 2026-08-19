@@ -1,7 +1,7 @@
 from __future__ import annotations
 import random
 
-NUM_MOVEMENTS = 4
+import config
 
 class Genome:
     """
@@ -22,5 +22,5 @@ class Genome:
 
     @classmethod
     def random(cls, length: int) -> Genome:
-        genes = [random.randrange(NUM_MOVEMENTS) for _ in range(length)]
+        genes = [random.randrange(config.NUM_MOVEMENTS) for _ in range(length)]
         return cls(genes)

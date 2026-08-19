@@ -30,6 +30,10 @@ class GeneticAlgorithm:
             crossover_rate=config.CROSSOVER_RATE
         )
 
+        self.mutation = Mutation(
+            mutation_rate=config.MUTATION_RATE
+        )
+
         self.selection_amount=selection_amount
 
     def run(self):
@@ -106,6 +110,9 @@ class GeneticAlgorithm:
                 parent_a_genome=parent_a.genome,
                 parent_b_genome=parent_b.genome
             )
+
+            self.mutation.mutate(child_a_genome)
+            self.mutation.mutate(child_b_genome)
 
             child_a = Agent(child_a_genome)
             child_b = Agent(child_b_genome)
