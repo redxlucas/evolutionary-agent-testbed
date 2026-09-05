@@ -1,5 +1,4 @@
 import random
-import config
 
 from evolution import *
 
@@ -15,7 +14,9 @@ class GeneticAlgorithm:
         fitness_evaluator: FitnessEvaluator,
         generations: int,
         tournament_size: int,
-        selection_amount: int
+        selection_amount: int,
+        crossover_rate: float,
+        mutation_rate: float
     ):
         self.metrics: list[GenerationMetrics] = []
         self.population = population
@@ -25,16 +26,15 @@ class GeneticAlgorithm:
         self.selection = Selection(
             tournament_size=tournament_size,
         )
+        self.selection_amount = selection_amount
 
         self.crossover = Crossover(
-            crossover_rate=config.CROSSOVER_RATE
+            crossover_rate=crossover_rate
         )
 
         self.mutation = Mutation(
-            mutation_rate=config.MUTATION_RATE
+            mutation_rate=mutation_rate
         )
-
-        self.selection_amount=selection_amount
 
     def run(self):
         for generation in range(self.generations):
@@ -49,7 +49,7 @@ class GeneticAlgorithm:
             self.metrics.append(generation_metrics)
 
             parents = self.selection.select(
-                self.population.individuals,
+                population=self.population.individuals,
                 amount=self.selection_amount
             )
 
