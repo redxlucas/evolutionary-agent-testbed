@@ -16,7 +16,8 @@ class GeneticAlgorithm:
         tournament_size: int,
         selection_amount: int,
         crossover_rate: float,
-        mutation_rate: float
+        mutation_rate: float,
+        elite_size: int = 0
     ):
         self.metrics: list[GenerationMetrics] = []
         self.population = population
@@ -27,6 +28,9 @@ class GeneticAlgorithm:
             tournament_size=tournament_size,
         )
         self.selection_amount = selection_amount
+        self.elitism = Elitism(
+            elite_size=elite_size
+        )
 
         self.crossover = Crossover(
             crossover_rate=crossover_rate
@@ -48,14 +52,23 @@ class GeneticAlgorithm:
 
             self.metrics.append(generation_metrics)
 
+            elites = self.elitism.select_elites(
+                population=self.population,
+            )
+
             parents = self.selection.select(
                 population=self.population.individuals,
                 amount=self.selection_amount
             )
 
-            offspring = self._create_offspring(parents)
+            offspring_amount = (len(self.population) - len(elites))
 
-            self.population.individuals = offspring
+            offspring = self._create_offspring(
+                parents=parents,
+                amount=offspring_amount   
+            )
+
+            self.population.individuals = elites.individuals + offspring
 
     def _evaluate_population(self):
         for agent in self.population.individuals:
@@ -97,11 +110,11 @@ class GeneticAlgorithm:
             success_rate=success_rate
         )
 
-    def _create_offspring(self, parents: Population) -> list[Agent]:
+    def _create_offspring(self, parents: Population, amount: int) -> list[Agent]:
 
         offspring = []
 
-        while len(offspring) < len(self.population.individuals):
+        while len(offspring) < amount:
 
             parent_a = random.choice(parents.individuals)
             parent_b = random.choice(parents.individuals)
@@ -119,7 +132,7 @@ class GeneticAlgorithm:
 
             offspring.append(child_a)
 
-            if len(offspring) < len(self.population.individuals):
+            if len(offspring) < amount:
                 offspring.append(child_b)
 
         return offspring
