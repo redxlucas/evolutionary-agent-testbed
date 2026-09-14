@@ -7,7 +7,9 @@ NUM_MOVEMENTS = 4
 
 # Population
 
-SEEDS = [1, 2, 3, 4, 5, 10, 20, 30, 40, 50]
+SEEDS = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+
+# SEEDS = [42]
 
 POPULATION_SIZE = 50
 GENOME_LENGTH = 100
