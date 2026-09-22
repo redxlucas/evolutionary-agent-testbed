@@ -1,8 +1,45 @@
 import config
+from evolution import FitnessStrategy
 from simulation import SimulationResult
 from utils import manhattan_distance
-
 class FitnessEvaluator:
+
+    def __init__(self, strategy: FitnessStrategy):
+        self.strategy = strategy
+
+    def evaluate(self, result: SimulationResult) -> float:
+
+        if self.strategy == FitnessStrategy.REWARD:
+            return self._evaluate_reward(result)
+        
+        if self.strategy == FitnessStrategy.FINAL_DISTANCE:
+            return self._evaluate_final_distance(result)
+        
+        if self.strategy == FitnessStrategy.PROGRESS:
+            return self._evaluate_progress(result)
+        
+        raise ValueError(
+            f"Unknown fitness strategy: {self.strategy}"
+        )
+    
+    def _evaluate_reward(self, result: SimulationResult) -> float:
+        return result.total_reward
+    
+    def _evaluate_final_distance(self, result: SimulationResult) -> float:
+        distance_reward = self._calculate_distance_reward(
+            result.final_position, 
+            result.goal_position
+        )
+
+        return result.total_reward + distance_reward
+    
+    def _evaluate_progress(self, result: SimulationResult) -> float:
+        steps_reward = self._calculate_steps_reward(
+            steps=result.steps,
+            max_steps=config.GENOME_LENGTH,
+            success=result.total_reward
+        )
+        return result.total_reward + steps_reward
     
     @staticmethod
     def _calculate_distance_reward(pos_a, pos_b):
@@ -17,21 +54,5 @@ class FitnessEvaluator:
             return 0.0
 
         return 1 - (steps / max_steps)
-
-
-
-    def evaluate(self, result: SimulationResult) -> float:
-        distance_reward = self._calculate_distance_reward(
-            result.final_position, 
-            result.goal_position
-        )
-        
-        steps_reward = self._calculate_steps_reward(
-            steps=result.steps,
-            max_steps=config.GENOME_LENGTH,
-            success=result.total_reward
-        )
-
-        return result.total_reward + distance_reward + steps_reward
 
 

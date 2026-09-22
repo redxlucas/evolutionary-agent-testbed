@@ -7,15 +7,22 @@ NUM_MOVEMENTS = 4
 
 # Population
 
+SEEDS = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+
+# SEEDS = [42]
+
 POPULATION_SIZE = 50
 GENOME_LENGTH = 100
-
 GENERATIONS = 200
 
 # -- Selection --
 
 TOURNAMENT_SIZE = 3
 SELECTION_AMOUNT = 30
+
+# Elitism
+
+ELITE_SIZE = 3
 
 # -- Crossover --
 

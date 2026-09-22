@@ -4,7 +4,10 @@ from evolution import GenerationMetrics
 
 class GenerationPlotter:
 
-    def __init__(self, metrics: list[GenerationMetrics]):
+    def __init__(
+        self,
+        metrics: list[GenerationMetrics] | None = None
+    ):
         self.metrics = metrics
 
     def plot_fitness(self):
@@ -55,5 +58,53 @@ class GenerationPlotter:
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
+
+        plt.show()
+
+    def plot_fitness_comparison(
+        self,
+        without_elitism_metrics,
+        with_elitism_metrics
+    ):
+
+        without_elitism_generations = [
+            metric.generation
+            for metric in without_elitism_metrics
+        ]
+
+        without_elitism_best_fitness = [
+            metric.best_fitness
+            for metric in without_elitism_metrics
+        ]
+
+        with_elitism_generations = [
+            metric.generation
+            for metric in with_elitism_metrics
+        ]
+
+        with_elitism_best_fitness = [
+            metric.best_fitness
+            for metric in with_elitism_metrics
+        ]
+
+        plt.figure()
+
+        plt.plot(
+            without_elitism_generations,
+            without_elitism_best_fitness,
+            label="Sem elitismo"
+        )
+
+        plt.plot(
+            with_elitism_generations,
+            with_elitism_best_fitness,
+            label="Com elitismo (3)"
+        )
+
+        plt.xlabel("Geração")
+        plt.ylabel("Melhor fitness")
+        plt.title("Comparação do fitness com e sem elitismo")
+
+        plt.legend()
 
         plt.show()
