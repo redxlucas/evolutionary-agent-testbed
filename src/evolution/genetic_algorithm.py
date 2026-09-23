@@ -52,49 +52,57 @@ class GeneticAlgorithm:
 
             self.metrics.append(generation_metrics)
 
-            elites = self.elitism.select_elites(
-                population=self.population,
-            )
+            # elites = self.elitism.select_elites(
+            #     population=self.population,
+            # )
 
-            parents = self.selection.select(
-                population=self.population.individuals,
-                amount=self.selection_amount
-            )
+            # parents = self.selection.select(
+            #     population=self.population.individuals,
+            #     amount=self.selection_amount
+            # )
 
-            offspring_amount = (len(self.population) - len(elites))
+            # offspring_amount = (len(self.population) - len(elites))
 
-            offspring = self._create_offspring(
-                parents=parents,
-                amount=offspring_amount   
-            )
+            # offspring = self._create_offspring(
+            #     parents=parents,
+            #     amount=offspring_amount   
+            # )
 
-            self.population.individuals = elites.individuals + offspring
+            # self.population.individuals = elites.individuals + offspring
 
     def _evaluate_population(self):
-        for agent in self.population.individuals:
+        environment = FrozenLakeEnvironment()
 
-            environment = FrozenLakeEnvironment() # corrigir para não instanciar um novo ambiente toda vez
+        for genome in self.population:
+
+            adaline = Adaline(
+                weights=genome.get_weights(),
+                bias=genome.get_bias()
+            )
+
             simulation = Simulation(
-                    agent=agent, 
+                    adaline=adaline, 
                     environment=environment
             )
             result = simulation.run()
 
-            agent.fitness = self.fitness_evaluator.evaluate(result)
-            agent.success = result.final_position == result.goal_position
+            genome.fitness = self.fitness_evaluator.evaluate(result)
+            genome.result = result
+
+        environment.close()
 
     def _collect_generation_metrics(self, population: Population, generation: int) -> GenerationMetrics:
-        if not population.individuals:
+        if not population.genomes:
             raise ValueError("Population cannot be empty.")
 
         fitness_values = [
-            agent.fitness
-            for agent in population.individuals
+            genome.fitness
+            for genome in population.genomes
         ]
 
         success_count = sum(
-            agent.success
-            for agent in population.individuals
+            genome.result.total_reward >= 1
+            for genome in population.genomes
         )
 
         best_fitness = max(fitness_values)

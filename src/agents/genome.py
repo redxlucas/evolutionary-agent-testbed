@@ -1,15 +1,16 @@
 from __future__ import annotations
 import random
 
+import numpy as np
+
 import config
 
 class Genome:
-    """
-    Classe que representa o genoma de um agente evolutivo.
-    """
 
-    def __init__(self, genes: list[int]):
-        self.genes = genes
+    def __init__(self, genes):
+        self.genes = np.array(genes, dtype=float)
+        self.fitness = None
+        self.result = None
 
     def __len__(self) -> int:
         return len(self.genes)
@@ -19,6 +20,12 @@ class Genome:
 
     def copy(self):
         return Genome(self.genes.copy())
+
+    def get_weights(self):
+        return self.genes[:32].reshape(8, 4)
+
+    def get_bias(self):
+        return self.genes[32:36]
 
     @classmethod
     def random(cls, length: int) -> Genome:

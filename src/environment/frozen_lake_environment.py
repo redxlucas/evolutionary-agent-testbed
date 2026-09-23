@@ -48,6 +48,36 @@ class FrozenLakeEnvironment:
         
         return tuple(positions[0])
 
+    def get_local_observation(self):
+        row, col = self.get_agent_position()
+
+        mapping = {
+            b'S': 0,
+            b'F': 0,
+            b'H': -2,
+            b'G': 1
+        }
+
+        grid = np.vectorize(mapping.get)(self.env.unwrapped.desc)
+
+        pad_width=config.BORDER_WIDTH
+
+        padded_grid = np.pad(
+            grid,
+            pad_width=pad_width,
+            constant_values=-1
+        ) # adiciona valores nas paredes 
+
+        padded_row = row + pad_width
+        padded_col = col + pad_width
+
+        observation = padded_grid[
+            padded_row - 1:padded_row + 2,
+            padded_col - 1:padded_col + 2
+        ]
+
+        return observation
+
     def sample_action(self):
         return self.env.action_space.sample()
 
