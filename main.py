@@ -1,79 +1,59 @@
+
 import random
 
 import numpy as np
 
-from agents.adaline import Adaline
 import config
-from environment import FrozenLakeEnvironment
 from evolution import GeneticAlgorithm
 from evolution import FitnessEvaluator
-from evolution.population import Population
-from simulation.simulation import Simulation
-from visualization.generation_plotter import GenerationPlotter
+from evolution import Population
+from experiment.experiment_analyzer import ExperimentAnalyzer
+from experiment.experiment_runner import ExperimentRunner
+from utils import Logger
+from visualization import ExperimentPlotter
 
-random.seed(42)
-np.random.seed(42)
+def main():
+    Logger.configure()
 
-population = Population.random(
-    size=config.POPULATION_SIZE,
-    genome_length=config.GENOME_LENGTH,
-)
+    runner = ExperimentRunner(
+        runs=config.EXPERIMENT_RUNS,
+        algorithm_factory=create_algorithm,
+        base_seed=config.SEED
+    )
 
-algorithm = GeneticAlgorithm(
-    population=population,
-    fitness_evaluator=FitnessEvaluator(),
-    generations=config.GENERATIONS,
-    tournament_size=config.TOURNAMENT_SIZE,
-    selection_amount=config.SELECTION_AMOUNT,
-    crossover_rate=config.CROSSOVER_RATE,
-    mutation_rate=config.MUTATION_RATE,
-    elite_size=config.ELITE_SIZE,
-)
+    results = runner.run()
 
-algorithm.run()
+    analyzer = ExperimentAnalyzer(results)
+    metrics = analyzer.analyze()
 
-plotter = GenerationPlotter(algorithm.metrics)
+    experiment_plotter = ExperimentPlotter(metrics)
 
-plotter.plot_fitness()
-plotter.show()
+    experiment_plotter.plot_experiment()
+    experiment_plotter.show()
 
-# genome = population.genomes[5]
+    # plotter = ExperimentPlotter(metrics)
+    # plotter.plot_fitness()
+    # plotter.show()
 
-# adaline = Adaline(
-#     weights=genome.get_weights(),
-#     bias=genome.get_bias()
-# )
+def create_algorithm(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    population = Population.random(
+        size=config.POPULATION_SIZE,
+        genome_length=config.GENOME_LENGTH,
+    )
 
-# environment = FrozenLakeEnvironment()
+    return GeneticAlgorithm(
+        population=population,
+        fitness_evaluator=FitnessEvaluator(),
+        generations=config.GENERATIONS,
+        tournament_size=config.TOURNAMENT_SIZE,
+        selection_amount=config.SELECTION_AMOUNT,
+        crossover_rate=config.CROSSOVER_RATE,
+        mutation_rate=config.MUTATION_RATE,
+        elite_size=config.ELITE_SIZE,
+    )
 
-# simulation = Simulation(adaline, environment)
-
-# simulation.run_debug()
-
-# algorithm = GeneticAlgorithm(
-#     population=population,
-#     fitness_evaluator=FitnessEvaluator(),
-#     generations=config.GENERATIONS,
-#     tournament_size=config.TOURNAMENT_SIZE,
-#     selection_amount=config.SELECTION_AMOUNT,
-#     crossover_rate=config.CROSSOVER_RATE,
-#     mutation_rate=config.MUTATION_RATE,
-#     elite_size=config.ELITE_SIZE,
-# )
-
-# algorithm._evaluate_population()
-
-# for i, genome in enumerate(population.genomes):
-#     result = genome.result
-
-#     print(
-#         f"Fitness={genome.fitness} | "
-#         f"Reward={result.total_reward} | "
-#         f"Steps={result.steps} | "
-#         f"Final={result.final_position} | "
-#         f"Goal={result.goal_position} | "
-#         f"Terminated={result.terminated} | "
-#         f"Truncated={result.truncated}"
-#     )
-
-
+if __name__ == "__main__":
+    main()
