@@ -3,7 +3,6 @@ from scipy import stats
 
 from experiment.aggregated_generation_metrics import AggregatedGenerationMetrics
 
-
 class ExperimentAnalyzer:
 
     def __init__(self, results):
@@ -19,11 +18,6 @@ class ExperimentAnalyzer:
                 run[generation].average_fitness
                 for run in self.results
             ]
-
-            # print(
-            #     f"Generation {generation}: "
-            #     f"values={values}"
-            # )
 
             (
                 mean,

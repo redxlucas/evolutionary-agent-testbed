@@ -1,32 +1,11 @@
-from .genome import Genome
+from typing import Protocol
 
-class Agent:
-    """
-    Classe que representa um agente que interage com o ambiente.
-    Guarda o genoma, posição atual e fitness, e fornece métodos para
-    resetar estado, agir com base na observação e atualizar fitness.
-    """
 
-    def __init__(self, genome: Genome):
-        self.genome = genome
-        self.position = None
-        self.current_gene = 0
+class Agent(Protocol):
 
-    def __repr__(self):
-        return f"Agent(fitness={self.fitness})"
+    def reset(self) -> None:
+        ...
 
-    def reset(self, start_position):
-        self.position = start_position
-        self.fitness = 0
-        self.success = False
-        self.current_gene = 0
+    def act(self, observation):
+        ...
 
-    def act(self, observation=None):
-        """
-        Retorna uma ação baseada no genoma.
-        """
-        
-        action = self.genome.get_gene(self.current_gene)
-        self.current_gene += 1
-
-        return action

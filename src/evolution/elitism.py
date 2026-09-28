@@ -1,4 +1,3 @@
-from agents import Agent
 from evolution import Population
 
 class Elitism:
@@ -18,28 +17,15 @@ class Elitism:
                 "Elite size cannot be greater than population size."
             )
          
-        selected_agents = sorted(
-             population, # ver se precisa chamar .individuals
-             key=lambda agent: agent.fitness,
-             reverse=True     
+        selected_genomes = sorted(
+            population.individuals,
+            key=lambda genome: genome.fitness,
+            reverse=True
         )[:self.elite_size]
 
-        return self._copy_population(selected_agents=selected_agents)
-    
-    def _copy_population(self, selected_agents) -> Population:
-
-        elites = []
-
-        for agent in selected_agents:
-
-            elite_genome = agent.genome.copy()
-            elite_agent = Agent(elite_genome)
-            elite_agent.fitness = agent.fitness
-            elite_agent.success = agent.success
-
-            elites.append(elite_agent)
-
-        return Population(elites)
-
-         
-        
+        return Population(
+            individuals=[
+                genome.copy()
+                for genome in selected_genomes
+            ]
+        )

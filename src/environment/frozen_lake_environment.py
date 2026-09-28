@@ -20,6 +20,31 @@ class FrozenLakeEnvironment:
         self.state = None
         self.size = int(config.DEFAULT_MAP_SIZE.split("x")[0])
 
+        self._prepare_grid()
+
+    def _prepare_grid(self):
+        desc = self.env.unwrapped.desc
+
+        goal_positions = np.argwhere(desc == b"G")
+
+        if len(goal_positions) == 0:
+            raise ValueError("Goal position not found.")
+
+        self._goal_position = tuple(goal_positions[0])
+
+        grid = np.zeros(desc.shape, dtype=np.float32)
+
+        grid[desc == b"H"] = -2
+        grid[desc == b"G"] = 1
+
+        pad_width = config.BORDER_WIDTH
+
+        self._padded_grid = np.pad(
+            grid,
+            pad_width=config.BORDER_WIDTH,
+            constant_values=-1
+        )
+
     def reset(self):
         observation, _ = self.env.reset()
         
@@ -40,43 +65,21 @@ class FrozenLakeEnvironment:
 
         return row, col
     
-    def get_goal_position(self) -> tuple[int, int]:
-        positions = np.argwhere(self.env.unwrapped.desc == b"G")
-
-        if len(positions) == 0:
-            raise ValueError("Goal position not found.")
-        
-        return tuple(positions[0])
+    def get_goal_position(self):
+        return self._goal_position
 
     def get_local_observation(self):
         row, col = self.get_agent_position()
 
-        mapping = {
-            b'S': 0,
-            b'F': 0,
-            b'H': -2,
-            b'G': 1
-        }
-
-        grid = np.vectorize(mapping.get)(self.env.unwrapped.desc)
-
-        pad_width=config.BORDER_WIDTH
-
-        padded_grid = np.pad(
-            grid,
-            pad_width=pad_width,
-            constant_values=-1
-        ) # adiciona valores nas paredes 
+        pad_width = config.BORDER_WIDTH
 
         padded_row = row + pad_width
         padded_col = col + pad_width
 
-        observation = padded_grid[
+        return self._padded_grid[
             padded_row - 1:padded_row + 2,
             padded_col - 1:padded_col + 2
         ]
-
-        return observation
 
     def sample_action(self):
         return self.env.action_space.sample()

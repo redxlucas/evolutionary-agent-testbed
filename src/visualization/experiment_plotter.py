@@ -1,5 +1,7 @@
+import statistics
 import numpy as np
 
+from evolution.fitness_strategy import FitnessStrategy
 from experiment import AggregatedGenerationMetrics
 from visualization import Plotter
 
@@ -53,3 +55,76 @@ class ExperimentPlotter(Plotter):
                 alpha=0.8
             )
         )
+
+
+    def plot_fitness_comparison(self):
+
+        strategy_labels = {
+            FitnessStrategy.REWARD: "Reward",
+            FitnessStrategy.FINAL_DISTANCE: "Final Distance",
+            FitnessStrategy.PROGRESS: "Progress",
+        }
+
+        for strategy, experiments in self.metrics.items():
+
+            generations = [
+                metric.generation
+                for metric in experiments[0]
+            ]
+
+            mean_fitness = []
+            std_fitness = []
+
+            for generation_index in range(len(generations)):
+
+                values = [
+                    run[generation_index].average_fitness
+                    for run in experiments
+                ]
+
+                mean_fitness.append(
+                    statistics.mean(values)
+                )
+
+                std_fitness.append(
+                    statistics.stdev(values)
+                    if len(values) > 1
+                    else 0.0
+                )
+
+            self.plot_line(
+                generations,
+                mean_fitness,
+                label=strategy_labels[strategy]
+            )
+
+            lower_bound = [
+                mean - std
+                for mean, std in zip(
+                    mean_fitness,
+                    std_fitness
+                )
+            ]
+
+            upper_bound = [
+                mean + std
+                for mean, std in zip(
+                    mean_fitness,
+                    std_fitness
+                )
+            ]
+
+            self.axes.fill_between(
+                generations,
+                lower_bound,
+                upper_bound,
+                alpha=0.15
+            )
+
+        self.configure(
+            title="Comparação das Estratégias de Fitness",
+            xlabel="Geração",
+            ylabel="Fitness Médio"
+        )
+
+        self.axes.legend()

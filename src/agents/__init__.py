@@ -1,5 +1,7 @@
-from .agent import Agent
+from .genome_agent import GenomeAgent
+from .adaline_genome import AdalineGenome
+from .adaline_agent import AdalineAgent
 from .genome import Genome
-from .adaline import Adaline
+from .agent import Agent
 
-__all__ = ["Agent", "Genome", "Adaline"]
+__all__ = ["GenomeAgent", "AdalineGenome", "AdalineAgent", "Genome", "Agent"]

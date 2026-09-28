@@ -18,7 +18,7 @@ from experiment import ExperimentAnalyzer
 from experiment import ExperimentConfig
 from experiment import ExperimentRunner
 
-from utils import Logger
+from utils import Logger, logger
 
 from visualization import ExperimentPlotter
 
@@ -126,6 +126,13 @@ def run_fitness_comparison():
 
     for strategy in strategies:
 
+        # logger.info(
+        #     "Starting fitness strategy experiment | strategy=%s | runs=%d | base_seed=%d",
+        #     strategy.value,
+        #     config.EXPERIMENT_RUNS,
+        #     config.SEED
+        # )
+
         runner = ExperimentRunner(
             runs=config.EXPERIMENT_RUNS,
             algorithm_factory=lambda seed, strategy=strategy: (
@@ -140,14 +147,15 @@ def run_fitness_comparison():
 
         results[strategy] = runner.run()
 
-    # analyzer = ExperimentAnalyzer(results)
-    # metrics = analyzer.analyze()
+        # logger.info(
+        #     "Finished fitness strategy experiment | strategy=%s",
+        #     strategy.value
+        # )
 
     experiment_plotter = ExperimentPlotter(results)
-    
-    experiment_plotter.plot_experiment()
-    experiment_plotter.show()
 
+    experiment_plotter.plot_fitness_comparison()
+    experiment_plotter.show()
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 from agents import Genome
 import config
 
@@ -15,8 +17,8 @@ class Crossover:
 
         crossover_point = random.randint(1, config.GENOME_LENGTH - 1)
 
-        child_a_genes = (parent_a_genome.genes[:crossover_point] + parent_b_genome.genes[crossover_point:])
-        child_b_genes = (parent_a_genome.genes[crossover_point:] + parent_b_genome.genes[:crossover_point])
+        child_a_genes = np.concatenate([parent_a_genome.genes[:crossover_point], parent_b_genome.genes[crossover_point:]])
+        child_b_genes = np.concatenate([parent_a_genome.genes[crossover_point:], parent_b_genome.genes[:crossover_point]])
 
         child_a = Genome(child_a_genes)
         child_b = Genome(child_b_genes)

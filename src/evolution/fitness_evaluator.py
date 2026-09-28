@@ -4,24 +4,30 @@ from simulation import SimulationResult
 from utils import manhattan_distance
 class FitnessEvaluator:
 
-    # def __init__(self, strategy: FitnessStrategy):
-    #     self.strategy = strategy
+    def __init__(self, strategy: FitnessStrategy):
+        self.strategy = strategy
 
     def evaluate(self, result: SimulationResult) -> float:
-        reward = self._calculate_reward(result)
-        
-        distance = self._calculate_distance_reward(
-            result.final_position,
-            result.goal_position
-        )
-        
-        steps = self._calculate_steps_reward(
-            steps=result.steps,
-            max_steps=config.MAX_STEPS,
-            success=result.total_reward >=1
-        )
 
-        return reward + distance + steps
+        if self.strategy == FitnessStrategy.REWARD:
+            return self._calculate_reward(result)
+
+        if self.strategy == FitnessStrategy.FINAL_DISTANCE:
+            return self._calculate_distance_reward(
+                result.final_position,
+                result.goal_position
+            )
+
+        if self.strategy == FitnessStrategy.PROGRESS:
+            return self._calculate_steps_reward(
+                steps=result.steps,
+                max_steps=config.MAX_STEPS,
+                success=result.total_reward >= 1
+            )
+
+        raise ValueError(
+            f"Unknown fitness strategy: {self.strategy}"
+        )
     
     def _calculate_reward(self, result: SimulationResult) -> float:
         return result.total_reward
