@@ -5,8 +5,7 @@ import config
 
 class FrozenLakeEnvironment:
     """
-    Classe responsável por encapsular a interação com o ambiente
-    FrozenLake disponibilizado pelo Gymnasium.
+    Encapsulates interaction with the Gymnasium FrozenLake environment.
     """
 
     def __init__(self, desc=None, is_slippery=False):
@@ -18,7 +17,7 @@ class FrozenLakeEnvironment:
             map_name=config.DEFAULT_MAP_SIZE
         )
         self.state = None
-        self.size = int(config.DEFAULT_MAP_SIZE.split("x")[0])
+        self.size = self.env.unwrapped.desc.shape[0]
 
         self._prepare_grid()
 
@@ -32,17 +31,19 @@ class FrozenLakeEnvironment:
 
         self._goal_position = tuple(goal_positions[0])
 
-        grid = np.zeros(desc.shape, dtype=np.float32)
+        grid = np.full(
+            desc.shape,
+            config.EMPTY_CELL_VALUE,
+            dtype=np.float32
+        )
 
-        grid[desc == b"H"] = -2
-        grid[desc == b"G"] = 1
-
-        pad_width = config.BORDER_WIDTH
+        grid[desc == b"H"] = config.HOLE_CELL_VALUE
+        grid[desc == b"G"] = config.GOAL_CELL_VALUE
 
         self._padded_grid = np.pad(
             grid,
             pad_width=config.BORDER_WIDTH,
-            constant_values=-1
+            constant_values=config.BORDER_CELL_VALUE
         )
 
     def reset(self):
@@ -65,7 +66,7 @@ class FrozenLakeEnvironment:
 
         return row, col
     
-    def get_goal_position(self):
+    def get_goal_position(self) -> tuple[int, int]:
         return self._goal_position
 
     def get_local_observation(self):
@@ -76,9 +77,12 @@ class FrozenLakeEnvironment:
         padded_row = row + pad_width
         padded_col = col + pad_width
 
+        observation_size = config.OBSERVATION_SIZE
+        half_size = observation_size // 2
+
         return self._padded_grid[
-            padded_row - 1:padded_row + 2,
-            padded_col - 1:padded_col + 2
+            padded_row - half_size:padded_row + half_size + 1,
+            padded_col - half_size:padded_col + half_size + 1
         ]
 
     def sample_action(self):

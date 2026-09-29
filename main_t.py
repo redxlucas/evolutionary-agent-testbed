@@ -5,10 +5,10 @@ import numpy as np
 
 import config
 
-from agents import Genome
-from agents import AdalineGenome
+from agents.genome import AdalineGenome
+from agents.genome import MovementGenome
 from agents import AdalineAgent
-from agents import GenomeAgent
+from agents import MovementAgent
 
 from evolution import GeneticAlgorithm
 from evolution import FitnessEvaluator
@@ -106,15 +106,15 @@ def configure_experiment(
 
         return ExperimentConfig(
             genome_factory=lambda: AdalineGenome.random(config.GENOME_LENGTH),
-            agent_creator=AdalineAgent.create_adaline_agent,
+            agent_creator=AdalineAgent.create,
             evolve=False
         )
 
     if experiment == "MOVEMENT":
 
         return ExperimentConfig(
-            genome_factory=lambda: Genome.random(config.GENOME_LENGTH),
-            agent_creator=GenomeAgent.create_genome_agent,
+            genome_factory=lambda: MovementGenome.random(config.GENOME_LENGTH),
+            agent_creator=MovementAgent.create,
             evolve=True
         )
 

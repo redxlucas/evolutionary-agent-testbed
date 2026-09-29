@@ -1,4 +1,4 @@
-from agents import Genome
+from agents.genome import MovementGenome
 import random
 import config
 
@@ -8,7 +8,7 @@ class Mutation:
     def __init__(self, mutation_rate: float):
         self.mutation_rate = mutation_rate
 
-    def mutate(self, genome: Genome) -> Genome:
+    def mutate(self, genome: MovementGenome) -> MovementGenome:
         for i in range(len(genome)):
             if random.random() < self.mutation_rate:
                 possible_genes = [

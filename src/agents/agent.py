@@ -6,6 +6,6 @@ class Agent(Protocol):
     def reset(self) -> None:
         ...
 
-    def act(self, observation):
+    def act(self, observation) -> int:
         ...
 
