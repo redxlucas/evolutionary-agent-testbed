@@ -60,10 +60,12 @@ class ExperimentPlotter(Plotter):
     def plot_fitness_comparison(self):
 
         strategy_labels = {
-            FitnessStrategy.REWARD: "Reward",
-            FitnessStrategy.FINAL_DISTANCE: "Final Distance",
-            FitnessStrategy.PROGRESS: "Progress",
+            FitnessStrategy.REWARD: "Recompensa",
+            FitnessStrategy.FINAL_DISTANCE: "Distância Manhattan",
+            FitnessStrategy.PROGRESS: "Progresso (passos)",
         }
+
+        stats_text = []
 
         for strategy, experiments in self.metrics.items():
 
@@ -74,6 +76,9 @@ class ExperimentPlotter(Plotter):
 
             mean_fitness = []
             std_fitness = []
+            margin_of_error = []
+            lower_bound = []
+            upper_bound = []
 
             for generation_index in range(len(generations)):
 
@@ -82,37 +87,37 @@ class ExperimentPlotter(Plotter):
                     for run in experiments
                 ]
 
-                mean_fitness.append(
-                    statistics.mean(values)
-                )
+                mean = statistics.mean(values)
 
-                std_fitness.append(
+                std = (
                     statistics.stdev(values)
                     if len(values) > 1
                     else 0.0
                 )
+
+                n = len(values)
+
+                standard_error = (
+                    std / (n ** 0.5)
+                    if n > 1
+                    else 0.0
+                )
+
+                # Aproximação para IC 95%
+                margin = 1.96 * standard_error
+
+                mean_fitness.append(mean)
+                std_fitness.append(std)
+                margin_of_error.append(margin)
+
+                lower_bound.append(mean - margin)
+                upper_bound.append(mean + margin)
 
             self.plot_line(
                 generations,
                 mean_fitness,
                 label=strategy_labels[strategy]
             )
-
-            lower_bound = [
-                mean - std
-                for mean, std in zip(
-                    mean_fitness,
-                    std_fitness
-                )
-            ]
-
-            upper_bound = [
-                mean + std
-                for mean, std in zip(
-                    mean_fitness,
-                    std_fitness
-                )
-            ]
 
             self.axes.fill_between(
                 generations,
@@ -121,6 +126,28 @@ class ExperimentPlotter(Plotter):
                 alpha=0.15
             )
 
+            mean_std = statistics.mean(std_fitness)
+            mean_margin = statistics.mean(margin_of_error)
+
+            stats_text.append(
+                f"{strategy_labels[strategy]}\n"
+                f"  Desvio padrão médio: {mean_std:.4f}\n"
+                f"  Margem de erro média: {mean_margin:.4f}"
+            )
+
+        self.axes.text(
+            0.02,
+            0.97,
+            "Estatísticas (IC 95%)\n\n" + "\n\n".join(stats_text),
+            transform=self.axes.transAxes,
+            verticalalignment="top",
+            bbox=dict(
+                boxstyle="round",
+                facecolor="white",
+                alpha=0.8
+            )
+        )
+
         self.configure(
             title="Comparação das Estratégias de Fitness",
             xlabel="Geração",
@@ -128,3 +155,5 @@ class ExperimentPlotter(Plotter):
         )
 
         self.axes.legend()
+
+        

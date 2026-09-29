@@ -1,4 +1,5 @@
 import random
+import time
 
 import numpy as np
 
@@ -18,17 +19,20 @@ from experiment import ExperimentAnalyzer
 from experiment import ExperimentConfig
 from experiment import ExperimentRunner
 
-from utils import Logger, logger
+from utils import Logger
 
 from visualization import ExperimentPlotter
-
 
 def main():
 
     Logger.configure()
+    logger = Logger(__name__)
+
+    start_time = time.perf_counter()
 
     if config.EXPERIMENT_MODE == "FITNESS_COMPARISON":
-        run_fitness_comparison()
+        run_fitness_comparison(start_time, logger)
+
         return
 
     experiment = configure_experiment(
@@ -51,6 +55,14 @@ def main():
 
     experiment_plotter = ExperimentPlotter(metrics)
     experiment_plotter.plot_experiment()
+
+    elapsed_time = time.perf_counter() - start_time
+
+    logger.info(
+        "Total execution time | %.2f seconds",
+        elapsed_time
+    )
+
     experiment_plotter.show()
 
 
@@ -110,11 +122,7 @@ def configure_experiment(
         f"Unknown experiment type: {experiment}"
     )
 
-def run_fitness_comparison():
-
-    experiment = configure_experiment(
-        config.EXPERIMENT_TYPE
-    )
+def run_fitness_comparison(start_time, logger):
 
     strategies = [
         FitnessStrategy.REWARD,
@@ -126,35 +134,27 @@ def run_fitness_comparison():
 
     for strategy in strategies:
 
-        # logger.info(
-        #     "Starting fitness strategy experiment | strategy=%s | runs=%d | base_seed=%d",
-        #     strategy.value,
-        #     config.EXPERIMENT_RUNS,
-        #     config.SEED
-        # )
-
         runner = ExperimentRunner(
             runs=config.EXPERIMENT_RUNS,
-            algorithm_factory=lambda seed, strategy=strategy: (
-                create_algorithm(
-                    seed,
-                    experiment,
-                    strategy
-                )
-            ),
-            base_seed=config.SEED
+            experiment_type=config.EXPERIMENT_TYPE,
+            fitness_strategy=strategy,
+            base_seed=config.SEED,
+            workers=config.WORKERS
         )
 
         results[strategy] = runner.run()
 
-        # logger.info(
-        #     "Finished fitness strategy experiment | strategy=%s",
-        #     strategy.value
-        # )
-
     experiment_plotter = ExperimentPlotter(results)
 
     experiment_plotter.plot_fitness_comparison()
+
+    elapsed_time = time.perf_counter() - start_time
+
+    logger.info(
+        "Total execution time | %.2f seconds",
+        elapsed_time
+    )
+
     experiment_plotter.show()
 
 if __name__ == "__main__":
