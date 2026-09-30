@@ -2,20 +2,31 @@
 
 from concurrent.futures import ProcessPoolExecutor
 
+import config
 from experiment.experiment_factory import configure_experiment, create_algorithm
 from utils import Logger
 
 def _run_experiment(args):
+    """
+    Executes a single experiment run in a worker process.
+
+    Creates the experiment and genetic algorithm using the provided
+    configuration, executes the evolution, and returns its metrics.
+    """
     seed, experiment_type, fitness_strategy = args
+
+    Logger.configure(config.LOG_LEVEL)
+    logger = Logger(__name__)
 
     experiment = configure_experiment(
         experiment_type
     )
 
     algorithm = create_algorithm(
-        seed,
-        experiment,
-        fitness_strategy
+        seed=seed,
+        experiment=experiment,
+        logger=logger,
+        fitness_strategy=fitness_strategy,
     )
 
     algorithm.run()
@@ -23,14 +34,21 @@ def _run_experiment(args):
     return algorithm.metrics
 
 class ExperimentRunner:
+    """
+    Coordinates multiple independent experiment runs.
+
+    Runs can be executed sequentially or in parallel using multiple
+    worker processes, with a deterministic seed assigned to each run.
+    """
 
     def __init__(
         self,
         runs,
         experiment_type,
         fitness_strategy,
+        logger: Logger,
         base_seed=42,
-        workers=1
+        workers=1,
     ):
         self.runs = runs
         self.experiment_type = experiment_type
@@ -38,14 +56,19 @@ class ExperimentRunner:
         self.base_seed = base_seed
         self.workers = workers
         self.results = []
-
-        self.logger = Logger(__name__)
+        self.logger = logger
 
     def run(self):
+        """
+        Executes all configured experiment runs.
+
+        Each run receives a unique seed derived from the base seed.
+        Results are collected after all processes complete.
+        """
 
         self.logger.info(
             "Starting experiment | fitness_strategy=%s | runs=%d | base_seed=%d | workers=%d",
-            self.fitness_strategy.name,
+            self.fitness_strategy.name if self.fitness_strategy else None,
             self.runs,
             self.base_seed,
             self.workers

@@ -8,7 +8,9 @@ from .simulation_result import SimulationResult
 
 
 class Simulation:
-
+    """
+    Executes an agent in an environment and collects the simulation results.
+    """
     def __init__(
         self,
         agent: Agent,
@@ -18,31 +20,28 @@ class Simulation:
         self.environment = environment
 
     def run(self) -> SimulationResult:
+        """
+        Runs the simulation and returns the resulting metrics.
+        """
         self.environment.reset()
         self.agent.reset()
 
-        done = False
         terminated = False
         truncated = False
         total_reward = 0
         steps = 0
 
         for _ in range(config.MAX_STEPS):
-
-            if done:
-                break
-
             observation = self.environment.get_local_observation()
-
             action = self.agent.act(observation)
 
-            _, reward, terminated, truncated = \
-                self.environment.step(action)
-
-            done = terminated or truncated
+            _, reward, terminated, truncated = self.environment.step(action)
 
             total_reward += reward
             steps += 1
+
+            if terminated or truncated:
+                break
 
         return SimulationResult(
             total_reward=total_reward,

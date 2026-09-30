@@ -25,7 +25,7 @@ from visualization import ExperimentPlotter
 
 def main():
 
-    Logger.configure()
+    Logger.configure(config.LOG_LEVEL)
     logger = Logger(__name__)
 
     start_time = time.perf_counter()
@@ -41,11 +41,10 @@ def main():
 
     runner = ExperimentRunner(
         runs=config.EXPERIMENT_RUNS,
-        algorithm_factory=lambda seed: create_algorithm(
-            seed,
-            experiment
-        ),
-        base_seed=config.SEED
+        experiment_type=config.EXPERIMENT_TYPE,
+        fitness_strategy=None,
+        base_seed=config.SEED,
+        workers=config.WORKERS
     )
 
     results = runner.run()
@@ -69,7 +68,8 @@ def main():
 def create_algorithm(
     seed: int,
     experiment: ExperimentConfig,
-    fitness_strategy=None
+    logger: Logger,
+    fitness_strategy=None,
 ):
 
     random.seed(seed)
@@ -93,6 +93,7 @@ def create_algorithm(
         selection_amount=config.SELECTION_AMOUNT,
         crossover_rate=config.CROSSOVER_RATE,
         mutation_rate=config.MUTATION_RATE,
+        logger=logger,
         elite_size=config.ELITE_SIZE,
         evolve=experiment.evolve
     )

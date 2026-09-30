@@ -1,13 +1,27 @@
 import random
 
-from evolution import *
+from agents.genome import Genome
+
+from evolution import (
+    Crossover,
+    Elitism,
+    FitnessEvaluator,
+    GenerationMetrics,
+    Mutation,
+    Population,
+    Selection,
+)
 
 from environment import FrozenLakeEnvironment
 
 from simulation import Simulation
+from utils import Logger
 
 
 class GeneticAlgorithm:
+    """
+    Implements a genetic algorithm for evolving a population of genomes.
+    """
 
     def __init__(
         self,
@@ -19,8 +33,9 @@ class GeneticAlgorithm:
         selection_amount: int,
         crossover_rate: float,
         mutation_rate: float,
+        logger: Logger,
         elite_size: int = 0,
-        evolve: bool = True
+        evolve: bool = True,
     ):
         self.metrics: list[GenerationMetrics] = []
 
@@ -48,28 +63,42 @@ class GeneticAlgorithm:
         self.mutation = Mutation(
             mutation_rate=mutation_rate
         )
+        self.logger = logger
 
     def run(self):
-
-        for generation in range(self.generations):
-
-            self._evaluate_population()
-
-            generation_metrics = self._collect_generation_metrics(
-                population=self.population,
-                generation=generation
-            )
-
-            self.metrics.append(generation_metrics)
-
-            if self.evolve:
-                self._evolve_population()
-
-        return self.metrics
-
-    def _evaluate_population(self):
-
+        """
+        Runs the genetic algorithm and returns the generation metrics.
+        """
         environment = FrozenLakeEnvironment()
+
+        try:
+            for generation in range(self.generations):
+                self.logger.debug(
+                    "Starting generation | generation=%d",
+                    generation
+                )
+
+                self._evaluate_population(environment)
+
+                generation_metrics = self._collect_generation_metrics(
+                    population=self.population,
+                    generation=generation
+                )
+
+                self.metrics.append(generation_metrics)
+
+                if self.evolve:
+                    self._evolve_population()
+
+            return self.metrics
+        
+        finally:
+            environment.close()
+
+    def _evaluate_population(self, environment: FrozenLakeEnvironment):
+        """
+        Evaluates the fitness of all individuals in the population.
+        """
 
         for genome in self.population:
 
@@ -88,9 +117,57 @@ class GeneticAlgorithm:
 
             genome.result = result
 
-        environment.close()
+    def _collect_generation_metrics(
+        self,
+        population: Population,
+        generation: int
+    ) -> GenerationMetrics:
+        """
+        Collects fitness and success metrics for a generation.
+        """
+
+        if not population.individuals:
+            raise ValueError("Population cannot be empty.")
+
+        fitness_values = [
+            genome.fitness
+            for genome in population.individuals
+        ]
+
+        success_count = sum(
+            genome.result.total_reward >= 1
+            for genome in population.individuals
+        )
+
+        best_fitness = max(fitness_values)
+        average_fitness = (
+            sum(fitness_values) / len(population)
+        )
+        worst_fitness = min(fitness_values)
+        success_rate = success_count / len(population)
+
+        self.logger.debug(
+            "Generation metrics | generation=%d | best=%.4f | avg=%.4f | "
+            "worst=%.4f | success_rate=%.4f",
+            generation,
+            best_fitness,
+            average_fitness,
+            worst_fitness,
+            success_rate
+        )
+
+        return GenerationMetrics(
+            generation=generation,
+            best_fitness=best_fitness,
+            average_fitness=average_fitness,
+            worst_fitness=worst_fitness,
+            success_rate=success_rate
+        )
 
     def _evolve_population(self):
+        """
+        Creates the next generation through selection, crossover, and mutation.
+        """
 
         elites = self.elitism.select_elites(
             population=self.population
@@ -114,55 +191,28 @@ class GeneticAlgorithm:
             elites.individuals + offspring
         )
 
-    def _collect_generation_metrics(
-        self,
-        population: Population,
-        generation: int
-    ) -> GenerationMetrics:
-
-        if not population.individuals:
-            raise ValueError("Population cannot be empty.")
-
-        fitness_values = [
-            genome.fitness
-            for genome in population.individuals
-        ]
-
-        success_count = sum(
-            genome.result.total_reward >= 1
-            for genome in population.individuals
-        )
-
-        best_fitness = max(fitness_values)
-        average_fitness = (
-            sum(fitness_values) / len(population)
-        )
-        worst_fitness = min(fitness_values)
-        success_rate = success_count / len(population)
-
-        # print(
-        #     f"Generation {generation}: "
-        #     f"best={best_fitness:.4f}, "
-        #     f"avg={average_fitness:.4f}, "
-        #     f"worst={worst_fitness:.4f}, "
-        #     f"success_rate={success_rate:.4f}"
-        # )
-
-        return GenerationMetrics(
-            generation=generation,
-            best_fitness=best_fitness,
-            average_fitness=average_fitness,
-            worst_fitness=worst_fitness,
-            success_rate=success_rate
+        self.logger.debug(
+            "Evolving population | elites=%d | parents=%d | offspring=%d",
+            len(elites),
+            len(parents),
+            offspring_amount
         )
 
     def _create_offspring(
         self,
         parents: Population,
         amount: int
-    ) -> list:
+    ) -> list[Genome]:
+        """
+        Creates offspring from selected parents using crossover and mutation.
+        """
 
         offspring = []
+
+        self.logger.debug(
+            "Creating offspring | target_amount=%d",
+            amount
+        )
 
         while len(offspring) < amount:
 

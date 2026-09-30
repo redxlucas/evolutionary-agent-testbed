@@ -2,6 +2,9 @@ from dataclasses import dataclass
 
 @dataclass
 class AggregatedGenerationMetrics:
+    """
+    Stores aggregated statistics for a single generation.
+    """
     generation: int
     mean_fitness: float
     std_fitness: float

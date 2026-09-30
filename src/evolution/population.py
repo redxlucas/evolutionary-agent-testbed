@@ -1,9 +1,13 @@
 from typing import Callable, Generic, TypeVar
 
-T = TypeVar("T")
+from agents.genome import Genome
 
+T = TypeVar("T", bound=Genome)
 
 class Population(Generic[T]):
+    """
+    Collection of individuals managed by the genetic algorithm.
+    """
 
     def __init__(self, individuals: list[T]):
         self.individuals = individuals

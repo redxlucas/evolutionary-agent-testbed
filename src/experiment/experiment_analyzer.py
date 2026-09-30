@@ -4,11 +4,21 @@ from scipy import stats
 from experiment.aggregated_generation_metrics import AggregatedGenerationMetrics
 
 class ExperimentAnalyzer:
+    """
+    Analyzes the results of multiple experiment runs.
+    """
 
     def __init__(self, results):
         self.results = results
 
-    def analyze(self):
+    def analyze(self) -> list[AggregatedGenerationMetrics]:
+        """
+        Aggregates the fitness metrics for each generation.
+        """
+
+        if not self.results:
+            raise ValueError("No experiment results were provided.")
+
         generations = len(self.results[0])
 
         aggregated_metrics = []
@@ -41,7 +51,12 @@ class ExperimentAnalyzer:
         return aggregated_metrics
 
     def _calculate_statistics(self, values):
-        values = np.array(values)
+        """
+        Calculates the mean, standard deviation, margin of error,
+        and 95% confidence interval for the provided values.
+        """
+
+        values = np.asarray(values)
 
         mean = np.mean(values)
         std = np.std(values, ddof=1)

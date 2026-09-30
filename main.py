@@ -1,47 +1,43 @@
-import random
-
-import numpy as np
+import time
 
 import config
 
-from agents import Genome
-from agents import AdalineGenome
-from agents import AdalineAgent
-from agents import GenomeAgent
-
-from evolution import GeneticAlgorithm
-from evolution import FitnessEvaluator
-from evolution import Population
-
 from evolution import FitnessStrategy
-from experiment import ExperimentAnalyzer
-from experiment import ExperimentConfig
-from experiment import ExperimentRunner
-
-from utils import Logger
-
+from experiment import (
+    ExperimentAnalyzer,
+    ExperimentRunner,
+)
 from visualization import ExperimentPlotter
+from utils import Logger
 
 
 def main():
+    Logger.configure(config.LOG_LEVEL)
+    logger = Logger(__name__)
 
-    Logger.configure()
+    start_time = time.perf_counter()
 
     if config.EXPERIMENT_MODE == "FITNESS_COMPARISON":
-        run_fitness_comparison()
-        return
+        run_fitness_comparison(logger=logger)
+    else:
+        run_experiment(logger=logger)
 
-    experiment = configure_experiment(
-        config.EXPERIMENT_TYPE
+    elapsed_time = time.perf_counter() - start_time
+
+    logger.info(
+        "Total execution time | %.2f seconds",
+        elapsed_time
     )
 
+
+def run_experiment(logger: Logger):
     runner = ExperimentRunner(
         runs=config.EXPERIMENT_RUNS,
-        algorithm_factory=lambda seed: create_algorithm(
-            seed,
-            experiment
-        ),
-        base_seed=config.SEED
+        experiment_type=config.EXPERIMENT_TYPE,
+        fitness_strategy=None,
+        logger=logger,
+        base_seed=config.SEED,
+        workers=config.WORKERS
     )
 
     results = runner.run()
@@ -49,73 +45,12 @@ def main():
     analyzer = ExperimentAnalyzer(results)
     metrics = analyzer.analyze()
 
-    experiment_plotter = ExperimentPlotter(metrics)
-    experiment_plotter.plot_experiment()
-    experiment_plotter.show()
+    plotter = ExperimentPlotter(metrics)
+    plotter.plot_experiment()
+    plotter.show()
 
 
-def create_algorithm(
-    seed: int,
-    experiment: ExperimentConfig,
-    fitness_strategy=None
-):
-
-    random.seed(seed)
-    np.random.seed(seed)
-
-    population = Population.random(
-        size=config.POPULATION_SIZE,
-        genome_factory=experiment.genome_factory
-    )
-
-    fitness_evaluator = FitnessEvaluator(
-        strategy=fitness_strategy
-    )
-
-    return GeneticAlgorithm(
-        population=population,
-        fitness_evaluator=fitness_evaluator,
-        agent_creator=experiment.agent_creator,
-        generations=config.GENERATIONS,
-        tournament_size=config.TOURNAMENT_SIZE,
-        selection_amount=config.SELECTION_AMOUNT,
-        crossover_rate=config.CROSSOVER_RATE,
-        mutation_rate=config.MUTATION_RATE,
-        elite_size=config.ELITE_SIZE,
-        evolve=experiment.evolve
-    )
-
-
-def configure_experiment(
-    experiment: str
-) -> ExperimentConfig:
-
-    if experiment == "ADALINE":
-
-        return ExperimentConfig(
-            genome_factory=lambda: AdalineGenome.random(config.GENOME_LENGTH),
-            agent_creator=AdalineAgent.create_adaline_agent,
-            evolve=False
-        )
-
-    if experiment == "MOVEMENT":
-
-        return ExperimentConfig(
-            genome_factory=lambda: Genome.random(config.GENOME_LENGTH),
-            agent_creator=GenomeAgent.create_genome_agent,
-            evolve=True
-        )
-
-    raise ValueError(
-        f"Unknown experiment type: {experiment}"
-    )
-
-def run_fitness_comparison():
-
-    experiment = configure_experiment(
-        config.EXPERIMENT_TYPE
-    )
-
+def run_fitness_comparison(logger: Logger):
     strategies = [
         FitnessStrategy.REWARD,
         FitnessStrategy.FINAL_DISTANCE,
@@ -125,28 +60,20 @@ def run_fitness_comparison():
     results = {}
 
     for strategy in strategies:
-
         runner = ExperimentRunner(
             runs=config.EXPERIMENT_RUNS,
-            algorithm_factory=lambda seed, strategy=strategy: (
-                create_algorithm(
-                    seed,
-                    experiment,
-                    strategy
-                )
-            ),
-            base_seed=config.SEED
+            experiment_type=config.EXPERIMENT_TYPE,
+            fitness_strategy=strategy,
+            logger=logger,
+            base_seed=config.SEED,
+            workers=config.WORKERS
         )
 
         results[strategy] = runner.run()
 
-    # analyzer = ExperimentAnalyzer(results)
-    # metrics = analyzer.analyze()
-
-    experiment_plotter = ExperimentPlotter(results)
-    
-    experiment_plotter.plot_experiment()
-    experiment_plotter.show()
+    plotter = ExperimentPlotter(results)
+    plotter.plot_fitness_comparison()
+    plotter.show()
 
 
 if __name__ == "__main__":

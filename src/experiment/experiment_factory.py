@@ -13,11 +13,19 @@ from evolution import GeneticAlgorithm
 from evolution import FitnessEvaluator
 from evolution import Population
 
+from utils import Logger
+
 from .experiment_config import ExperimentConfig
 
 def configure_experiment(
     experiment: str
 ) -> ExperimentConfig:
+    """
+    Creates the configuration associated with an experiment type.
+
+    The configuration defines the genome factory, agent creator, and
+    whether genetic operators should be applied during evolution.
+    """
 
     if experiment == "ADALINE":
         return ExperimentConfig(
@@ -45,8 +53,16 @@ def configure_experiment(
 def create_algorithm(
     seed: int,
     experiment: ExperimentConfig,
+    logger: Logger,
     fitness_strategy=None
 ):
+    """
+    Creates and configures the genetic algorithm for an experiment.
+
+    Initializes the random number generators, creates the initial
+    population and fitness evaluator, and assembles the genetic
+    algorithm using the provided experiment configuration.
+    """
 
     random.seed(seed)
     np.random.seed(seed)
@@ -69,6 +85,7 @@ def create_algorithm(
         selection_amount=config.SELECTION_AMOUNT,
         crossover_rate=config.CROSSOVER_RATE,
         mutation_rate=config.MUTATION_RATE,
+        logger=logger,
         elite_size=config.ELITE_SIZE,
         evolve=experiment.evolve
     )
