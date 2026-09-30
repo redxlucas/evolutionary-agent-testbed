@@ -5,8 +5,9 @@ from concurrent.futures import ProcessPoolExecutor
 import config
 from evolution import FitnessStrategy
 
+from .experiment_types import ExperimentMode
 from .experiment_analyzer import ExperimentAnalyzer
-from experiment.experiment_factory import configure_experiment, create_algorithm
+from .experiment_factory import configure_experiment, create_algorithm
 
 from utils import Logger
 from visualization.experiment_plotter import ExperimentPlotter
@@ -64,14 +65,14 @@ class ExperimentRunner:
         """
         Executes the experiment configured in the application.
         """
-        if config.EXPERIMENT_MODE == "FITNESS_COMPARISON":
+        if config.EXPERIMENT_MODE == ExperimentMode.FITNESS_COMPARISON.value:
             return self._run_fitness_comparison()
 
         return self._run_experiment()
 
-    def _run_experiment(self, fitness_strategy):
+    def _run_experiment(self):
         results = self._execute_runs(
-            fitness_strategy
+            fitness_strategy=FitnessStrategy.REWARD
         )
 
         analyzer = ExperimentAnalyzer(results)
@@ -97,13 +98,14 @@ class ExperimentRunner:
 
         return results
 
-        return results
-
-    def _execute_runs(self, fitness_strategy):
+    def _execute_runs(
+        self,
+        fitness_strategy: FitnessStrategy,
+    ):
         self.logger.info(
             "Starting experiment | fitness_strategy=%s | "
             "runs=%d | base_seed=%d | workers=%d",
-            fitness_strategy.value if fitness_strategy else None,
+            fitness_strategy.value,
             self.runs,
             self.base_seed,
             self.workers,
@@ -128,6 +130,9 @@ class ExperimentRunner:
                 )
             )
 
-        self.logger.info("Experiment completed")
+        self.logger.info(
+            "Experiment completed | fitness_strategy=%s",
+            fitness_strategy.value,
+        )
 
         return results

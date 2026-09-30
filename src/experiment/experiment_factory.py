@@ -13,12 +13,13 @@ from evolution import GeneticAlgorithm
 from evolution import FitnessEvaluator
 from evolution import Population
 
+from .experiment_types import ExperimentType
 from utils import Logger
 
 from .experiment_config import ExperimentConfig
 
 def configure_experiment(
-    experiment: str
+    experiment_type: ExperimentType
 ) -> ExperimentConfig:
     """
     Creates the configuration associated with an experiment type.
@@ -27,7 +28,7 @@ def configure_experiment(
     whether genetic operators should be applied during evolution.
     """
 
-    if experiment == "ADALINE":
+    if experiment_type == ExperimentType.ADALINE.value:
         return ExperimentConfig(
             genome_factory=lambda: AdalineGenome.random(
                 config.GENOME_LENGTH
@@ -36,7 +37,7 @@ def configure_experiment(
             evolve=False
         )
 
-    if experiment == "MOVEMENT":
+    if experiment_type == ExperimentType.MOVEMENT.value:
         return ExperimentConfig(
             genome_factory=lambda: MovementGenome.random(
                 config.GENOME_LENGTH
@@ -46,7 +47,7 @@ def configure_experiment(
         )
 
     raise ValueError(
-        f"Unknown experiment type: {experiment}"
+        f"Unknown experiment type: {experiment_type}"
     )
 
 
