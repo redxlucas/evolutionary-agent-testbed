@@ -1,6 +1,10 @@
 from evolution import Population
 
 class Elitism:
+    """
+    Selects the best individuals from a population to be preserved
+    in the next generation.
+    """
 
     def __init__(self, elite_size: int):
         if elite_size < 0:

@@ -43,50 +43,15 @@ class Simulation:
             if terminated or truncated:
                 break
 
+        final_position = self.environment.get_agent_position()
+        goal_position = self.environment.get_goal_position()
+
         return SimulationResult(
             total_reward=total_reward,
             steps=steps,
             terminated=terminated,
             truncated=truncated,
-            final_position=self.environment.get_agent_position(),
-            goal_position=self.environment.get_goal_position()
+            final_position=final_position,
+            goal_position=goal_position,
+            success = final_position == goal_position
         )
-
-    def run_debug(self) -> None:
-        self.environment.reset()
-        self.agent.reset()
-
-        done = False
-
-        action_names = {
-            0: "LEFT",
-            1: "DOWN",
-            2: "RIGHT",
-            3: "UP"
-        }
-
-        for step in range(config.MAX_STEPS):
-
-            if done:
-                break
-
-            position = self.environment.get_agent_position()
-            observation = self.environment.get_local_observation()
-
-            action = self.agent.act(observation)
-
-            print(f"\nStep: {step}")
-            print(f"Position: {position}")
-            print("Observation:")
-            print(observation)
-            print(f"Action: {action} ({action_names[action]})")
-
-            _, reward, terminated, truncated = \
-                self.environment.step(action)
-
-            new_position = self.environment.get_agent_position()
-
-            print(f"New position: {new_position}")
-            print(f"Reward: {reward}")
-
-            done = terminated or truncated

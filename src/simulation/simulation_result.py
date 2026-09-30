@@ -8,3 +8,4 @@ class SimulationResult:
     truncated: bool
     final_position: tuple[int, int]
     goal_position: tuple[int, int]
+    success: bool

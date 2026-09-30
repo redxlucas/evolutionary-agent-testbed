@@ -3,6 +3,9 @@ from evolution import FitnessStrategy
 from simulation import SimulationResult
 from utils import manhattan_distance
 class FitnessEvaluator:
+    """
+    Evaluates the fitness of an agent based on a selected strategy.
+    """
 
     def __init__(self, strategy: FitnessStrategy):
         self.strategy = strategy
@@ -22,7 +25,7 @@ class FitnessEvaluator:
             return self._calculate_steps_reward(
                 steps=result.steps,
                 max_steps=config.MAX_STEPS,
-                success=result.total_reward >= 1
+                success=result.success
             )
 
         raise ValueError(
@@ -45,21 +48,5 @@ class FitnessEvaluator:
             return 0.0
 
         return 1 - (steps / max_steps)
-    
-    # def _evaluate_final_distance(self, result: SimulationResult) -> float:
-    #     distance_reward = self._calculate_distance_reward(
-    #         result.final_position, 
-    #         result.goal_position
-    #     )
-
-    #     return result.total_reward + distance_reward
-    
-    # def _evaluate_progress(self, result: SimulationResult) -> float:
-    #     steps_reward = self._calculate_steps_reward(
-    #         steps=result.steps,
-    #         max_steps=config.GENOME_LENGTH,
-    #         success=result.total_reward
-    #     )
-    #     return result.total_reward + steps_reward
 
 

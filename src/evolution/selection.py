@@ -3,11 +3,18 @@ import random
 from evolution import Population
 
 class Selection:
+    """
+    Selects individuals using tournament selection.
+    """
 
     def __init__(self, tournament_size: int):
         self.tournament_size = tournament_size
 
-    def select(self, population: Population, amount: int) -> Population: # seleção baseada no tournament selection
+    def select(self, population: Population, amount: int) -> Population:
+        """
+        Selects individuals from the population using tournament selection.
+        """
+
         if self.tournament_size > len(population):
             raise ValueError(
                 "Tournament size cannot be greater than population size."
@@ -28,7 +35,7 @@ class Selection:
 
             winner = max(
                 tournament,
-                key=lambda agent: agent.fitness
+                key=lambda genome: genome.fitness
             )
 
             selected.append(winner)

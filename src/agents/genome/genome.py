@@ -25,6 +25,10 @@ class Genome(ABC):
     def copy(self) -> Genome:
         return self.__class__(self.genes.copy())
 
+    @abstractmethod
+    def get_gene_values(self):
+        pass
+
     @classmethod
     def random(cls, length: int):
         """

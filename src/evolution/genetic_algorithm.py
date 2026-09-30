@@ -135,7 +135,7 @@ class GeneticAlgorithm:
         ]
 
         success_count = sum(
-            genome.result.total_reward >= 1
+            genome.result.success
             for genome in population.individuals
         )
 
@@ -225,8 +225,8 @@ class GeneticAlgorithm:
             )
 
             child_a, child_b = self.crossover.crossover(
-                parent_a_genome=parent_a,
-                parent_b_genome=parent_b
+                parent_a=parent_a,
+                parent_b=parent_b
             )
 
             self.mutation.mutate(child_a)

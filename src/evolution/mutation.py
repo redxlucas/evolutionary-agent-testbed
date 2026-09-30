@@ -9,15 +9,19 @@ class Mutation:
         self.mutation_rate = mutation_rate
 
     def mutate(self, genome: MovementGenome) -> MovementGenome:
+        possible_genes = genome.get_gene_values()
+
         for i in range(len(genome)):
             if random.random() < self.mutation_rate:
-                possible_genes = [
+                current_gene = genome.genes[i]
+
+                alternatives = [
                     gene
-                    for gene in range(config.NUM_MOVEMENTS)
-                    if gene != genome.genes[i]
+                    for gene in possible_genes
+                    if gene != current_gene
                 ]
 
-                genome.genes[i] = random.choice(possible_genes)
+                genome.genes[i] = random.choice(alternatives)
 
         return genome
 

@@ -3,8 +3,13 @@
 from concurrent.futures import ProcessPoolExecutor
 
 import config
+from evolution import FitnessStrategy
+
+from .experiment_analyzer import ExperimentAnalyzer
 from experiment.experiment_factory import configure_experiment, create_algorithm
+
 from utils import Logger
+from visualization.experiment_plotter import ExperimentPlotter
 
 def _run_experiment(args):
     """
@@ -43,42 +48,72 @@ class ExperimentRunner:
 
     def __init__(
         self,
-        runs,
-        experiment_type,
-        fitness_strategy,
         logger: Logger,
-        base_seed=42,
-        workers=1,
+        runs: int = config.EXPERIMENT_RUNS,
+        experiment_type: str = config.EXPERIMENT_TYPE,
+        base_seed: int = config.SEED,
+        workers: int = config.WORKERS,
     ):
+        self.logger = logger
         self.runs = runs
         self.experiment_type = experiment_type
-        self.fitness_strategy = fitness_strategy
         self.base_seed = base_seed
         self.workers = workers
-        self.results = []
-        self.logger = logger
 
     def run(self):
         """
-        Executes all configured experiment runs.
-
-        Each run receives a unique seed derived from the base seed.
-        Results are collected after all processes complete.
+        Executes the experiment configured in the application.
         """
+        if config.EXPERIMENT_MODE == "FITNESS_COMPARISON":
+            return self._run_fitness_comparison()
 
+        return self._run_experiment()
+
+    def _run_experiment(self, fitness_strategy):
+        results = self._execute_runs(
+            fitness_strategy
+        )
+
+        analyzer = ExperimentAnalyzer(results)
+        metrics = analyzer.analyze()
+
+        plotter = ExperimentPlotter(metrics)
+        plotter.plot_experiment()
+        plotter.show()
+
+        return metrics
+
+    def _run_fitness_comparison(self):
+        results = {}
+
+        for strategy in FitnessStrategy:
+            results[strategy] = self._execute_runs(
+                fitness_strategy=strategy
+            )
+
+        plotter = ExperimentPlotter(results)
+        plotter.plot_fitness_comparison()
+        plotter.show()
+
+        return results
+
+        return results
+
+    def _execute_runs(self, fitness_strategy):
         self.logger.info(
-            "Starting experiment | fitness_strategy=%s | runs=%d | base_seed=%d | workers=%d",
-            self.fitness_strategy.name if self.fitness_strategy else None,
+            "Starting experiment | fitness_strategy=%s | "
+            "runs=%d | base_seed=%d | workers=%d",
+            fitness_strategy.value if fitness_strategy else None,
             self.runs,
             self.base_seed,
-            self.workers
+            self.workers,
         )
 
         tasks = [
             (
                 self.base_seed + run,
                 self.experiment_type,
-                self.fitness_strategy
+                fitness_strategy,
             )
             for run in range(self.runs)
         ]
@@ -86,13 +121,13 @@ class ExperimentRunner:
         with ProcessPoolExecutor(
             max_workers=self.workers
         ) as executor:
-            self.results = list(
+            results = list(
                 executor.map(
                     _run_experiment,
-                    tasks
+                    tasks,
                 )
             )
 
         self.logger.info("Experiment completed")
 
-        return self.results
+        return results

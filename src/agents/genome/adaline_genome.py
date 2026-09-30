@@ -15,6 +15,9 @@ class AdalineGenome(Genome):
         super().__init__(genes)
         self.genes = self.genes.astype(float)
 
+    def get_gene_values(self) -> list[int]:
+        return [-1, 0, 1]
+
     @staticmethod
     def random_gene():
         return random.uniform(-1, 1)

@@ -1,6 +1,9 @@
 from matplotlib import pyplot as plt
 
 class Plotter:
+    """
+    Base class for experiment plotters.
+    """
 
     def __init__(
             self,
