@@ -4,8 +4,9 @@ from evolution import FitnessStrategy
 from experiment.aggregated_generation_metrics import (
     AggregatedGenerationMetrics,
 )
+from experiment.experiment_analyzer import ExperimentAnalyzer
+from experiment.experiment_types import ExperimentType
 from visualization import Plotter
-
 
 class ExperimentPlotter(Plotter):
     """
@@ -15,9 +16,11 @@ class ExperimentPlotter(Plotter):
     def __init__(
         self,
         metrics: list[AggregatedGenerationMetrics],
+        experiment_type: ExperimentType
     ):
         super().__init__()
         self.metrics = metrics
+        self.experiment_type = experiment_type
 
     def plot_experiment(self):
         generations = [
@@ -25,35 +28,35 @@ class ExperimentPlotter(Plotter):
             for metric in self.metrics
         ]
 
-        mean_fitness = [
-            metric.mean_fitness
+        success_rate = [
+            metric.mean_success_rate * 100
             for metric in self.metrics
         ]
 
-        std_fitness = [
-            metric.std_fitness
+        std_success_rate = [
+            metric.std_success_rate * 100
             for metric in self.metrics
         ]
 
         margin_of_error = [
-            metric.margin_of_error
+            metric.margin_of_error * 100
             for metric in self.metrics
         ]
 
         lower_bound = [
-            metric.lower_bound
+            metric.lower_bound * 100
             for metric in self.metrics
         ]
 
         upper_bound = [
-            metric.upper_bound
+            metric.upper_bound * 100
             for metric in self.metrics
         ]
 
         self.plot_line(
             generations,
-            mean_fitness,
-            label="Média Fitness",
+            success_rate,
+            label="Taxa de sucesso",
         )
 
         self.axes.fill_between(
@@ -64,24 +67,24 @@ class ExperimentPlotter(Plotter):
             label="IC 95%",
         )
 
-        mean_std = statistics.mean(std_fitness)
+        mean_std = statistics.mean(std_success_rate)
         mean_margin = statistics.mean(margin_of_error)
 
         self.configure(
             title=(
-                "Evolução do Fitness Médio "
-                "ao Longo das Gerações"
+                "Evolução da Taxa de Sucesso ao Longo das Gerações"
+                f"- Agente {self.experiment_type.value}"
             ),
             xlabel="Geração",
-            ylabel="Fitness Médio",
+            ylabel="Taxa de sucesso (%)",
         )
 
         self.axes.text(
             0.02,
             0.97,
             (
-                f"Desvio padrão médio: {mean_std:.4f}\n"
-                f"Margem de erro média: {mean_margin:.4f}\n"
+                f"Desvio padrão médio: {mean_std:.2f} p.p.\n"
+                f"Margem de erro média: {mean_margin:.2f} p.p.\n"
                 f"IC: 95%"
             ),
             transform=self.axes.transAxes,
@@ -103,69 +106,56 @@ class ExperimentPlotter(Plotter):
         stats_text = []
 
         for strategy, experiments in self.metrics.items():
+            analyzer = ExperimentAnalyzer(experiments)
+            metrics = analyzer.analyze()
+
             generations = [
                 metric.generation
-                for metric in experiments[0]
+                for metric in metrics
             ]
 
-            mean_fitness = []
-            std_fitness = []
-            margin_of_error = []
-            lower_bound = []
-            upper_bound = []
+            mean_success_rate = [
+                metric.mean_success_rate
+                for metric in metrics
+            ]
 
-            for generation_index in range(len(generations)):
-                values = [
-                    run[generation_index].average_fitness
-                    for run in experiments
-                ]
+            lower_bound = [
+                metric.lower_bound
+                for metric in metrics
+            ]
 
-                mean = statistics.mean(values)
-
-                std = (
-                    statistics.stdev(values)
-                    if len(values) > 1
-                    else 0.0
-                )
-
-                n = len(values)
-
-                standard_error = (
-                    std / (n ** 0.5)
-                    if n > 1
-                    else 0.0
-                )
-
-                # Approximation for a 95% confidence interval.
-                margin = 1.96 * standard_error
-
-                mean_fitness.append(mean)
-                std_fitness.append(std)
-                margin_of_error.append(margin)
-
-                lower_bound.append(mean - margin)
-                upper_bound.append(mean + margin)
+            upper_bound = [
+                metric.upper_bound
+                for metric in metrics
+            ]
 
             self.plot_line(
                 generations,
-                mean_fitness,
+                [value * 100 for value in mean_success_rate],
                 label=strategy_labels[strategy],
             )
 
             self.axes.fill_between(
                 generations,
-                lower_bound,
-                upper_bound,
+                [value * 100 for value in lower_bound],
+                [value * 100 for value in upper_bound],
                 alpha=0.15,
             )
 
-            mean_std = statistics.mean(std_fitness)
-            mean_margin = statistics.mean(margin_of_error)
+            mean_std = statistics.mean(
+                metric.std_success_rate
+                for metric in metrics
+            ) * 100
+
+            mean_margin = statistics.mean(
+                metric.margin_of_error
+                for metric in metrics
+            ) * 100
 
             stats_text.append(
                 f"{strategy_labels[strategy]}\n"
-                f"  Desvio padrão médio: {mean_std:.4f}\n"
-                f"  Margem de erro média: {mean_margin:.4f}"
+                f"  Desvio padrão médio: {mean_std:.4f} p.p.\n"
+                f"  Margem de erro média: {mean_margin:.4f} p.p."
             )
 
         self.axes.text(
@@ -183,7 +173,9 @@ class ExperimentPlotter(Plotter):
         )
 
         self.configure(
-            title="Comparação das Estratégias de Fitness",
+            title=f"Comparação da Taxa de Sucesso por Estratégia de Fitness - Agente {self.experiment_type.value}",
             xlabel="Geração",
-            ylabel="Fitness Médio",
+            ylabel="Taxa de sucesso (%)",
         )
+
+        self.axes.set_ylim(0, 100)

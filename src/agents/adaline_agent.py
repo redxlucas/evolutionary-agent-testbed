@@ -1,6 +1,10 @@
+import logging
+
 import numpy as np
 
 from agents.genome import AdalineGenome
+
+logger = logging.getLogger(__name__)
 
 class AdalineAgent:
     """
@@ -10,6 +14,7 @@ class AdalineAgent:
     def __init__(self, weights: np.ndarray, bias: np.ndarray):
         self.weights = weights
         self.bias = bias
+        self.trace_context = ""
 
     def reset(self):
         pass
@@ -20,8 +25,19 @@ class AdalineAgent:
         """
         inputs = np.delete(observation.flatten(), observation.size // 2)
         outputs = self.predict(inputs)
+        action = int(np.argmax(outputs))
 
-        return int(np.argmax(outputs))
+        logger.debug(
+            "ADALINE decision | %s | observation=%s | inputs=%s | "
+            "outputs=%s | action=%d",
+            self.trace_context,
+            observation.tolist(),
+            inputs.tolist(),
+            outputs.tolist(),
+            action,
+        )
+
+        return action
 
     def predict(self, inputs):
         """

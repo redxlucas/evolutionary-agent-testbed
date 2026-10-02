@@ -25,7 +25,7 @@ class ExperimentAnalyzer:
 
         for generation in range(generations):
             values = [
-                run[generation].average_fitness
+                run[generation].success_rate
                 for run in self.results
             ]
 
@@ -40,8 +40,8 @@ class ExperimentAnalyzer:
             aggregated_metrics.append(
                 AggregatedGenerationMetrics(
                     generation=generation,
-                    mean_fitness=mean,
-                    std_fitness=std,
+                    mean_success_rate=mean,
+                    std_success_rate=std,
                     margin_of_error=margin_of_error,
                     lower_bound=lower_bound,
                     upper_bound=upper_bound,

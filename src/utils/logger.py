@@ -9,13 +9,15 @@ class Logger:
         self.logger = logging.getLogger(name)
 
     @staticmethod
-    def configure(level: str):
+    def configure(level: str, filename: str = "adaline_debug.log"):
         log_level = getattr(logging, level.upper(), None)
 
         if log_level is None:
             raise ValueError(f"Unknown log level: {level}")
 
         logging.basicConfig(
+            filename=filename,
+            filemode="w",
             level=log_level,
             format=(
                 "[%(asctime)s] | "
@@ -23,7 +25,8 @@ class Logger:
                 "%(name)s | "
                 "%(message)s"
             ),
-            datefmt="%Y-%m-%d %H:%M:%S"
+            datefmt="%Y-%m-%d %H:%M:%S",
+            encoding="utf-8",
         )
 
     logging.getLogger("matplotlib").setLevel(logging.WARNING)

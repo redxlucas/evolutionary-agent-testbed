@@ -1,6 +1,6 @@
 import pstats
 
-stats = pstats.Stats("profile_v2.prof")
+stats = pstats.Stats("profiling.prof")
 
 stats.strip_dirs()
 stats.sort_stats("cumulative")

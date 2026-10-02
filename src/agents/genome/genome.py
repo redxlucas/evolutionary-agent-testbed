@@ -9,7 +9,7 @@ class Genome(ABC):
     Base class representing a genome used by the genetic algorithm.
     """
     def __init__(self, genes):
-        self.genes = np.array(genes, dtype=int)
+        self.genes = np.array(genes)
         self.fitness = None
         self.result = None
 

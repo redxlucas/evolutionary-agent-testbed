@@ -28,12 +28,32 @@ class FitnessEvaluator:
                 success=result.success
             )
 
+        if self.strategy == FitnessStrategy.COMBINED:
+            return self._calculate_combined_fitness(result)
+
         raise ValueError(
             f"Unknown fitness strategy: {self.strategy}"
         )
     
     def _calculate_reward(self, result: SimulationResult) -> float:
         return result.total_reward
+
+    def _calculate_combined_fitness(
+        self,
+        result: SimulationResult,
+    ) -> float:
+        reward_fitness = self._calculate_reward(result)
+        distance_fitness = self._calculate_distance_reward(
+            result.final_position,
+            result.goal_position,
+        )
+        progress_fitness = self._calculate_steps_reward(
+            steps=result.steps,
+            max_steps=config.MAX_STEPS,
+            success=result.success,
+        )
+
+        return reward_fitness + distance_fitness + progress_fitness
 
     @staticmethod
     def _calculate_distance_reward(pos_a, pos_b):

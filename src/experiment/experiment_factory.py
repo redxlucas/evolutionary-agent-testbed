@@ -28,16 +28,16 @@ def configure_experiment(
     whether genetic operators should be applied during evolution.
     """
 
-    if experiment_type == ExperimentType.ADALINE.value:
+    if experiment_type == ExperimentType.ADALINE:
         return ExperimentConfig(
             genome_factory=lambda: AdalineGenome.random(
-                config.GENOME_LENGTH
+                AdalineGenome.GENOME_LENGTH
             ),
             agent_creator=AdalineAgent.create,
-            evolve=False
+            evolve=True
         )
 
-    if experiment_type == ExperimentType.MOVEMENT.value:
+    if experiment_type == ExperimentType.MOVEMENT:
         return ExperimentConfig(
             genome_factory=lambda: MovementGenome.random(
                 config.GENOME_LENGTH

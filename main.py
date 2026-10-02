@@ -1,10 +1,8 @@
 import time
 
-import config
-
 from experiment import ExperimentRunner
 from utils import Logger
-
+import config
 
 def main():
     Logger.configure(config.LOG_LEVEL)
@@ -21,7 +19,6 @@ def main():
         "Total execution time | %.2f seconds",
         elapsed_time
     )
-
 
 if __name__ == "__main__":
     main()

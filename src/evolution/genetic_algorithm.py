@@ -78,7 +78,7 @@ class GeneticAlgorithm:
                     generation
                 )
 
-                self._evaluate_population(environment)
+                self._evaluate_population(environment, generation)
 
                 generation_metrics = self._collect_generation_metrics(
                     population=self.population,
@@ -95,18 +95,32 @@ class GeneticAlgorithm:
         finally:
             environment.close()
 
-    def _evaluate_population(self, environment: FrozenLakeEnvironment):
+    def _evaluate_population(
+        self,
+        environment: FrozenLakeEnvironment,
+        generation: int,
+    ):
         """
         Evaluates the fitness of all individuals in the population.
         """
 
-        for genome in self.population:
+        for individual_index, genome in enumerate(self.population):
+
+            trace_context = (
+                f"generation={generation} individual={individual_index}"
+            )
+            self.logger.debug(
+                "Evaluating genome | %s | genes=%s",
+                trace_context,
+                genome.genes.tolist(),
+            )
 
             agent = self.agent_creator(genome)
 
             simulation = Simulation(
                 agent=agent,
-                environment=environment
+                environment=environment,
+                trace_context=trace_context,
             )
 
             result = simulation.run()
@@ -116,6 +130,13 @@ class GeneticAlgorithm:
             )
 
             genome.result = result
+
+            self.logger.debug(
+                "Individual evaluated | %s | fitness=%.4f | success=%s",
+                trace_context,
+                genome.fitness,
+                result.success,
+            )
 
     def _collect_generation_metrics(
         self,
@@ -171,6 +192,10 @@ class GeneticAlgorithm:
 
         elites = self.elitism.select_elites(
             population=self.population
+        )
+        self.logger.debug(
+            "Elites preserved | fitnesses=%s",
+            [genome.fitness for genome in elites.individuals],
         )
 
         parents = self.selection.select(

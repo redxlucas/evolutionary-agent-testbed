@@ -5,7 +5,7 @@ from concurrent.futures import ProcessPoolExecutor
 import config
 from evolution import FitnessStrategy
 
-from .experiment_types import ExperimentMode
+from .experiment_types import ExperimentMode, ExperimentType
 from .experiment_analyzer import ExperimentAnalyzer
 from .experiment_factory import configure_experiment, create_algorithm
 
@@ -21,7 +21,13 @@ def _run_experiment(args):
     """
     seed, experiment_type, fitness_strategy = args
 
-    Logger.configure(config.LOG_LEVEL)
+    log_filename = (
+        f"{experiment_type.value}_{fitness_strategy.value}_debug.log"
+    )
+    Logger.configure(
+        config.LOG_LEVEL,
+        filename=log_filename,
+    )
     logger = Logger(__name__)
 
     experiment = configure_experiment(
@@ -57,7 +63,7 @@ class ExperimentRunner:
     ):
         self.logger = logger
         self.runs = runs
-        self.experiment_type = experiment_type
+        self.experiment_type = ExperimentType(experiment_type)
         self.base_seed = base_seed
         self.workers = workers
 
@@ -72,13 +78,13 @@ class ExperimentRunner:
 
     def _run_experiment(self):
         results = self._execute_runs(
-            fitness_strategy=FitnessStrategy.REWARD
+            fitness_strategy=FitnessStrategy.COMBINED
         )
 
         analyzer = ExperimentAnalyzer(results)
         metrics = analyzer.analyze()
 
-        plotter = ExperimentPlotter(metrics)
+        plotter = ExperimentPlotter(metrics, self.experiment_type)
         plotter.plot_experiment()
         plotter.show()
 
@@ -87,12 +93,18 @@ class ExperimentRunner:
     def _run_fitness_comparison(self):
         results = {}
 
-        for strategy in FitnessStrategy:
+        comparison_strategies = (
+            FitnessStrategy.REWARD,
+            FitnessStrategy.FINAL_DISTANCE,
+            FitnessStrategy.PROGRESS,
+        )
+
+        for strategy in comparison_strategies:
             results[strategy] = self._execute_runs(
                 fitness_strategy=strategy
             )
 
-        plotter = ExperimentPlotter(results)
+        plotter = ExperimentPlotter(results, self.experiment_type)
         plotter.plot_fitness_comparison()
         plotter.show()
 
@@ -103,8 +115,9 @@ class ExperimentRunner:
         fitness_strategy: FitnessStrategy,
     ):
         self.logger.info(
-            "Starting experiment | fitness_strategy=%s | "
+            "Starting experiment | type=%s |fitness_strategy=%s | "
             "runs=%d | base_seed=%d | workers=%d",
+            self.experiment_type.value,
             fitness_strategy.value,
             self.runs,
             self.base_seed,
@@ -131,7 +144,8 @@ class ExperimentRunner:
             )
 
         self.logger.info(
-            "Experiment completed | fitness_strategy=%s",
+            "Experiment completed | type=%s | fitness_strategy=%s",
+            self.experiment_type.value,
             fitness_strategy.value,
         )
 

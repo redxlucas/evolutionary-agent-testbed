@@ -1,3 +1,5 @@
+import logging
+
 from agents import Agent
 
 import config
@@ -5,6 +7,8 @@ import config
 from environment import FrozenLakeEnvironment
 
 from .simulation_result import SimulationResult
+
+logger = logging.getLogger(__name__)
 
 
 class Simulation:
@@ -14,10 +18,12 @@ class Simulation:
     def __init__(
         self,
         agent: Agent,
-        environment: FrozenLakeEnvironment
+        environment: FrozenLakeEnvironment,
+        trace_context: str = ""
     ):
         self.agent = agent
         self.environment = environment
+        self.trace_context = trace_context
 
     def run(self) -> SimulationResult:
         """
@@ -31,11 +37,34 @@ class Simulation:
         total_reward = 0
         steps = 0
 
-        for _ in range(config.MAX_STEPS):
+        for step_index in range(config.MAX_STEPS):
             observation = self.environment.get_local_observation()
+            position = self.environment.get_agent_position()
+            if hasattr(self.agent, "trace_context"):
+                self.agent.trace_context = (
+                    f"{self.trace_context} step={step_index}"
+                )
             action = self.agent.act(observation)
 
-            _, reward, terminated, truncated = self.environment.step(action)
+            next_observation, reward, terminated, truncated = (
+                self.environment.step(action)
+            )
+            next_position = self.environment.get_agent_position()
+
+            logger.debug(
+                "Environment transition | %s | step=%d | position=%s | "
+                "action=%d | next_position=%s | reward=%s | terminated=%s | "
+                "truncated=%s | next_state=%s",
+                self.trace_context,
+                step_index,
+                position,
+                action,
+                next_position,
+                reward,
+                terminated,
+                truncated,
+                next_observation,
+            )
 
             total_reward += reward
             steps += 1
@@ -46,7 +75,7 @@ class Simulation:
         final_position = self.environment.get_agent_position()
         goal_position = self.environment.get_goal_position()
 
-        return SimulationResult(
+        result = SimulationResult(
             total_reward=total_reward,
             steps=steps,
             terminated=terminated,
@@ -55,3 +84,11 @@ class Simulation:
             goal_position=goal_position,
             success = final_position == goal_position
         )
+
+        logger.debug(
+            "Episode completed | %s | result=%s",
+            self.trace_context,
+            result,
+        )
+
+        return result
