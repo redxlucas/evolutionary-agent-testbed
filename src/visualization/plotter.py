@@ -38,7 +38,16 @@ class Plotter:
         self.axes.legend()
 
     def show(self):
-        self.figure.tight_layout()
+        layout_rect = getattr(self.figure, "layout_rect", None)
+        if layout_rect is None:
+            self.figure.tight_layout()
+        else:
+            self.figure.subplots_adjust(
+                left=layout_rect[0],
+                bottom=layout_rect[1],
+                right=layout_rect[2],
+                top=layout_rect[3],
+            )
         plt.show()
 
     def save(self, path):

@@ -15,20 +15,27 @@ BORDER_CELL_VALUE = -0.5
 
 # Experiment
 
-EXPERIMENT_TYPE = "adaline"
-EXPERIMENT_MODE = "combined"
+EXPERIMENT_TYPE = "mlp"
+EXPERIMENT_MODE = "configuration_comparison"
+EXPERIMENT_OPTIMIZER = "cross_entropy"
 
 EXPERIMENT_RUNS = 30
+MLP_HIDDEN_SIZES = (8, 16, 24)
 
 # Reproducibility and execution
 
 SEED = 42
-WORKERS = 1
-LOG_LEVEL = "DEBUG"
+WORKERS = 4
+LOG_LEVEL = "INFO"
+
+# Cross-Entropy Method
+
+CEM_INITIAL_STD = 1.0
+CEM_MIN_STD = 1e-3
 
 # Population
 
-POPULATION_SIZE = 30
+POPULATION_SIZE = 200
 GENERATIONS = 100
 MAX_STEPS = 50
 GENOME_LENGTH = 100
@@ -40,7 +47,7 @@ SELECTION_AMOUNT = 30
 
 # Elitism
 
-ELITE_SIZE = 3
+ELITE_SIZE = 10
 
 # Crossover
 

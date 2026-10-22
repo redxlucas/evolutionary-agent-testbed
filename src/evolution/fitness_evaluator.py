@@ -64,9 +64,11 @@ class FitnessEvaluator:
     @staticmethod
     def _calculate_steps_reward(steps: int, max_steps: int, success: bool) -> float:
 
-        if not success:
-            return 0.0
+        progress = 1 - (steps / max_steps)
 
-        return 1 - (steps / max_steps)
+        if success:
+            return 1.0 + progress
+
+        return progress * 0.5
 
 

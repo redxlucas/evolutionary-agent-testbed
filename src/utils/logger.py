@@ -1,4 +1,5 @@
 import logging
+import sys
 
 class Logger:
     """
@@ -16,8 +17,14 @@ class Logger:
             raise ValueError(f"Unknown log level: {level}")
 
         logging.basicConfig(
-            filename=filename,
-            filemode="w",
+            handlers=[
+                logging.StreamHandler(sys.stdout),
+                logging.FileHandler(
+                    filename,
+                    mode="w",
+                    encoding="utf-8",
+                ),
+            ],
             level=log_level,
             format=(
                 "[%(asctime)s] | "
@@ -26,7 +33,7 @@ class Logger:
                 "%(message)s"
             ),
             datefmt="%Y-%m-%d %H:%M:%S",
-            encoding="utf-8",
+            force=True,
         )
 
     logging.getLogger("matplotlib").setLevel(logging.WARNING)
