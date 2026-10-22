@@ -29,8 +29,10 @@ class Crossover:
         child_a_genes = np.concatenate([parent_a.genes[:crossover_point], parent_b.genes[crossover_point:]])
         child_b_genes = np.concatenate([parent_a.genes[crossover_point:], parent_b.genes[:crossover_point]])
 
-        child_a = parent_a.__class__(child_a_genes)
-        child_b = parent_b.__class__(child_b_genes)
+        child_a = parent_a.copy()
+        child_b = parent_b.copy()
+        child_a.genes = child_a_genes
+        child_b.genes = child_b_genes
 
         return child_a, child_b
 
