@@ -13,8 +13,9 @@ class CrossEntropyOptimizer:
 
     The optimizer maintains an independent Gaussian distribution for each
     genome parameter. At each iteration, candidates are sampled from the
-    distribution, evaluated, and the distribution is updated using the
-    elite candidates.
+    distribution, evaluated, and half of the population is sampled with
+    replacement using roulette-wheel selection. The distribution is updated
+    from that sample.
     """
 
     def __init__(
@@ -125,7 +126,9 @@ class CrossEntropyOptimizer:
 
                 elites = self._select_elites(candidates)
 
-                self._update_distribution(elites)
+                selected_candidates = self._select_by_roulette(candidates)
+
+                self._update_distribution(selected_candidates)
 
                 self.logger.debug(
                     "CEM distribution updated | iteration=%d",
@@ -204,42 +207,67 @@ class CrossEntropyOptimizer:
                 result.success,
             )
 
-    def _select_elites(
+    def _select_by_roulette(
         self,
         candidates: list[Genome],
     ) -> list[Genome]:
         """
-        Selects the candidates with the highest fitness values.
+        Samples candidates with replacement, proportional to fitness.
+
+        If every candidate has zero fitness, selection falls back to a
+        uniform sample so the distribution can continue exploring.
         """
-        sorted_candidates = sorted(
-            candidates,
-            key=lambda genome: genome.fitness,
-            reverse=True,
+        fitness_values = np.asarray(
+            [genome.fitness for genome in candidates],
+            dtype=float,
         )
 
-        return sorted_candidates[:self.elite_size]
+        if not np.all(np.isfinite(fitness_values)):
+            raise ValueError(
+                "Roulette selection requires finite fitness values."
+            )
+
+        if np.any(fitness_values < 0):
+            raise ValueError(
+                "Roulette selection requires non-negative fitness values."
+            )
+
+        total_fitness = np.sum(fitness_values)
+        if total_fitness == 0:
+            probabilities = None
+        else:
+            probabilities = fitness_values / total_fitness
+
+        selected_indices = self.rng.choice(
+            len(candidates),
+            size=self.elite_size,
+            replace=True,
+            p=probabilities,
+        )
+
+        return [candidates[index] for index in selected_indices]
 
     def _update_distribution(
         self,
-        elites: list[Genome],
+        candidates: list[Genome],
     ):
         """
-        Updates the Gaussian distribution using the elite candidates.
+        Updates the Gaussian distribution using the roulette sample.
         """
-        elite_parameters = np.array(
+        selected_parameters = np.array(
             [
                 genome.genes
-                for genome in elites
+                for genome in candidates
             ]
         )
 
         self.mean = np.mean(
-            elite_parameters,
+            selected_parameters,
             axis=0,
         )
 
         self.std = np.std(
-            elite_parameters,
+            selected_parameters,
             axis=0,
         )
 

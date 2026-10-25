@@ -209,7 +209,7 @@ class ExperimentRunner:
             )
             configurations.append(prelu_configuration)
 
-        fitness_strategy = FitnessStrategy.FINAL_DISTANCE
+        fitness_strategy = FitnessStrategy.REWARD
 
         results = {}
 
