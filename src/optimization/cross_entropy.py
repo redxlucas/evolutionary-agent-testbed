@@ -124,8 +124,6 @@ class CrossEntropyOptimizer:
 
                 self.metrics.append(generation_metrics)
 
-                elites = self._select_elites(candidates)
-
                 selected_candidates = self._select_by_roulette(candidates)
 
                 self._update_distribution(selected_candidates)

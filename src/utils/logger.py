@@ -51,5 +51,8 @@ class Logger:
     def error(self, message, *args):
         self.logger.error(message, *args)
 
+    def exception(self, message, *args):
+        self.logger.exception(message, *args)
+
     def critical(self, message, *args):
         self.logger.critical(message, *args)

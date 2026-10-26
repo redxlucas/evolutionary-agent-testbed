@@ -16,11 +16,11 @@ BORDER_CELL_VALUE = -0.5
 # Experiment
 
 EXPERIMENT_TYPE = "mlp"
-EXPERIMENT_MODE = "configuration_comparison"
+EXPERIMENT_MODE = "single"
 EXPERIMENT_OPTIMIZER = "cross_entropy"
 
 EXPERIMENT_RUNS = 30
-MLP_HIDDEN_SIZES = (8, 16, 24)
+MLP_HIDDEN_SIZES = (8,)
 
 # Reproducibility and execution
 
@@ -36,7 +36,7 @@ CEM_MIN_STD = 1e-3
 # Population
 
 POPULATION_SIZE = 200
-GENERATIONS = 100
+GENERATIONS = 200
 MAX_STEPS = 50
 GENOME_LENGTH = 100
 
@@ -47,7 +47,7 @@ SELECTION_AMOUNT = 30
 
 # Elitism
 
-ELITE_SIZE = 10
+ELITE_SIZE = 100
 
 # Crossover
 

@@ -95,6 +95,9 @@ class ExperimentRunner:
         """
         Executes the experiment configured in the application.
         """
+        if config.EXPERIMENT_MODE == ExperimentMode.SINGLE.value:
+            return self._run_single()
+
         if config.EXPERIMENT_MODE == ExperimentMode.FITNESS_COMPARISON.value:
             return self._run_fitness_comparison()
 
@@ -104,17 +107,44 @@ class ExperimentRunner:
         ):
             return self._run_configuration_comparison()
 
-        return self._run_experiment()
-
-    def _run_experiment(self):
-        results = self._execute_runs(
-            fitness_strategy=FitnessStrategy.COMBINED
+        raise ValueError(
+            f"Unknown experiment mode: {config.EXPERIMENT_MODE}"
         )
 
-        analyzer = ExperimentAnalyzer(results)
-        metrics = analyzer.analyze()
+    def _run_single(self):
+        """Run the configured agent and optimizer using reward fitness."""
+        if self.experiment_type == ExperimentType.MLP:
+            if not config.MLP_HIDDEN_SIZES:
+                raise ValueError(
+                    "MLP_HIDDEN_SIZES must contain a hidden size."
+                )
+
+            hidden_size = config.MLP_HIDDEN_SIZES[0]
+            configuration = configure_experiment(
+                ExperimentType.MLP,
+                activation=ActivationFunction.RELU,
+                hidden_size=hidden_size,
+            )
+            configuration.name = (
+                f"MLP + ReLU | {hidden_size} neurônios"
+            )
+        else:
+            configuration = configure_experiment(self.experiment_type)
+
+        results = self._execute_runs(
+            fitness_strategy=FitnessStrategy.REWARD,
+            configuration=configuration,
+        )
+        metrics = ExperimentAnalyzer(results).analyze()
+        optimizer = self._optimizer_for(configuration)
+
         plotter = ExperimentPlotter(metrics, self.experiment_type)
-        plotter.plot_experiment()
+        plotter.plot_experiment(
+            title=(
+                f"Taxa de sucesso por geração - {configuration.name} | "
+                f"{optimizer}"
+            )
+        )
         plotter.show()
 
         return metrics

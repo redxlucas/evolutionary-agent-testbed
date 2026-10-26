@@ -25,7 +25,7 @@ class ExperimentPlotter(Plotter):
         self.metrics = metrics
         self.experiment_type = experiment_type
 
-    def plot_experiment(self):
+    def plot_experiment(self, title: str | None = None):
         generations = [
             metric.generation
             for metric in self.metrics
@@ -74,9 +74,9 @@ class ExperimentPlotter(Plotter):
         mean_margin = statistics.mean(margin_of_error)
 
         self.configure(
-            title=(
+            title=title or (
                 "Evolução da Taxa de Sucesso ao Longo das Gerações"
-                f"- Agente {self.experiment_type.value}"
+                f" - Agente {self.experiment_type.value}"
             ),
             xlabel="Geração",
             ylabel="Taxa de sucesso (%)",
