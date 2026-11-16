@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from pathlib import Path
 
 
 class _TerminalLogFormatter(logging.Formatter):
@@ -54,8 +55,13 @@ class Logger:
         if log_level is None:
             raise ValueError(f"Unknown log level: {level}")
 
+        log_path = Path(filename)
+        if not log_path.is_absolute():
+            log_path = Path("logs") / log_path.name
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
         file_handler = logging.FileHandler(
-            filename,
+            log_path,
             mode="w",
             encoding="utf-8",
         )
