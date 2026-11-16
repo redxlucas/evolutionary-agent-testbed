@@ -29,6 +29,10 @@ class Genome(ABC):
     def get_gene_values(self):
         pass
 
+    def get_gene_bounds(self) -> tuple[float, float] | None:
+        """Return continuous gene limits, if this genome has them."""
+        return None
+
     @classmethod
     def random(cls, length: int):
         """

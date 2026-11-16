@@ -22,10 +22,12 @@ class MLPAgent:
     def reset(self):
         pass
 
-    def act(self, observation):
+    def act(self, observation, agent_observation_index=None):
+        if agent_observation_index is None:
+            agent_observation_index = observation.size // 2
         inputs = np.delete(
             observation.flatten(),
-            observation.size // 2
+            agent_observation_index,
         )
 
         outputs = self.predict(inputs)

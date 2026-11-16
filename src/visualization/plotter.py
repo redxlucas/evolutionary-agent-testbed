@@ -38,6 +38,10 @@ class Plotter:
         self.axes.legend()
 
     def show(self):
+        self._apply_layout()
+        plt.show()
+
+    def _apply_layout(self):
         layout_rect = getattr(self.figure, "layout_rect", None)
         if layout_rect is None:
             self.figure.tight_layout()
@@ -48,8 +52,12 @@ class Plotter:
                 right=layout_rect[2],
                 top=layout_rect[3],
             )
-        plt.show()
 
     def save(self, path):
-        self.figure.tight_layout()
-        self.figure.savefig(path, dpi=300)
+        self._apply_layout()
+        self.figure.savefig(
+            path,
+            dpi=300,
+            bbox_inches="tight",
+            pad_inches=0.2,
+        )

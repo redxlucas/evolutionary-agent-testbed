@@ -14,7 +14,7 @@ class MovementAgent:
     def reset(self):
         self.current_gene = 0
 
-    def act(self, observation=None):
+    def act(self, observation=None, agent_observation_index=None):
         """
         Returns the next action defined by the genome.
         """

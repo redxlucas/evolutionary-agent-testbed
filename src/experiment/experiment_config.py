@@ -15,3 +15,4 @@ class ExperimentConfig:
     activation: ActivationFunction = ActivationFunction.NONE
     evolve_alpha: bool = False
     hidden_size: int | None = None
+    output_size: int | None = None

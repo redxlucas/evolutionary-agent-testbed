@@ -19,14 +19,18 @@ class ExperimentAnalyzer:
         if not self.results:
             raise ValueError("No experiment results were provided.")
 
-        generations = len(self.results[0])
+        run_metrics = [
+            result.metrics if hasattr(result, "metrics") else result
+            for result in self.results
+        ]
+        generations = len(run_metrics[0])
 
         aggregated_metrics = []
 
         for generation in range(generations):
             values = [
                 run[generation].success_rate
-                for run in self.results
+                for run in run_metrics
             ]
 
             (

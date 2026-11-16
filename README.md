@@ -3,7 +3,7 @@
 - `python -m venv .venv`
 - `source .venv/Scripts/activate`
 - `python -m pip install --upgrade pip`
-- `pip install gymnasium pygame matplotlib`
+- `pip install gymnasium minigrid pygame matplotlib`
 
 ---
 
@@ -20,6 +20,10 @@ evolutionary-agent-testbed/
 ├── requirements.txt
 └── README.md
 ```
+
+## Dados do gráfico do modo single
+
+Ao executar `main.py` com `EXPERIMENT_MODE = "single"`, o programa salva um CSV em `experiment_results/`. Cada linha corresponde a uma geração e inclui a média, o desvio padrão e o intervalo de confiança usados no gráfico, além da taxa de sucesso de cada execução individual. O arquivo também registra as configurações e os rótulos do gráfico. Um novo arquivo com data e hora no nome é criado a cada execução.
 
 # Agente
 

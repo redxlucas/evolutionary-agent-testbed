@@ -2,11 +2,14 @@ import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 import numpy as np
 import config
+from .environment import Environment
 
-class FrozenLakeEnvironment:
+
+class FrozenLakeEnvironment(Environment):
     """
     Encapsulates interaction with the Gymnasium FrozenLake environment.
     """
+    ACTION_COUNT = 4
 
     def __init__(self, desc=None, is_slippery=False):
         self.env = gym.make(
@@ -84,6 +87,9 @@ class FrozenLakeEnvironment:
             padded_row - half_size:padded_row + half_size + 1,
             padded_col - half_size:padded_col + half_size + 1
         ]
+
+    def get_agent_observation_index(self) -> int:
+        return config.OBSERVATION_SIZE ** 2 // 2
 
     def sample_action(self):
         return self.env.action_space.sample()
