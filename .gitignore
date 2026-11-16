@@ -9,6 +9,5 @@ __pycache__/
 .pytest_cache
 .coverage
 *.log
-experiment_results/
 *.png
 *.csv
