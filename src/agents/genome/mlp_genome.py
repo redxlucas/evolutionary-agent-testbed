@@ -8,33 +8,19 @@ class MLPGenome(Genome):
 
     INPUT_SIZE = config.OBSERVATION_SIZE ** 2 - 1 # 8
     HIDDEN_SIZE = INPUT_SIZE # camada oculta deve sempre possuir valores iguais ao de entrada? # 8
-    OUTPUT_SIZE = config.NUM_MOVEMENTS # 4
-
-    INPUT_WEIGHTS_SIZE = INPUT_SIZE * HIDDEN_SIZE # 8 * 8 = 64
-    HIDDEN_BIAS_SIZE = HIDDEN_SIZE # 8
-    ALPHA_SIZE = HIDDEN_SIZE
-
-    OUTPUT_WEIGHTS_SIZE = HIDDEN_SIZE * OUTPUT_SIZE # 8 x 4 = 32
-    OUTPUT_BIAS_SIZE = OUTPUT_SIZE # 4
-
-    GENOME_LENGTH = (
-        INPUT_WEIGHTS_SIZE
-        + HIDDEN_BIAS_SIZE
-        + OUTPUT_WEIGHTS_SIZE
-        + OUTPUT_BIAS_SIZE
-        + ALPHA_SIZE
-    )
+    DEFAULT_OUTPUT_SIZE = 4
 
     GENE_MIN = -1.0
     GENE_MAX = 1.0
 
-    def __init__(self, genes, hidden_size=None):
+    def __init__(self, genes, hidden_size=None, output_size=None):
         self.hidden_size = hidden_size or self.HIDDEN_SIZE
+        self.output_size = output_size or self.DEFAULT_OUTPUT_SIZE
         self.input_weights_size = self.INPUT_SIZE * self.hidden_size
         self.hidden_bias_size = self.hidden_size
         self.alpha_size = self.hidden_size
-        self.output_weights_size = self.hidden_size * self.OUTPUT_SIZE
-        self.output_bias_size = self.OUTPUT_SIZE
+        self.output_weights_size = self.hidden_size * self.output_size
+        self.output_bias_size = self.output_size
         self.genome_length = (
             self.input_weights_size
             + self.hidden_bias_size
@@ -47,14 +33,21 @@ class MLPGenome(Genome):
     def get_gene_values(self) -> tuple[float, float]:
         return self.GENE_MIN, self.GENE_MAX
 
+    def get_gene_bounds(self) -> tuple[float, float]:
+        return self.GENE_MIN, self.GENE_MAX
+
     @staticmethod
     def random_gene():
         return random.uniform(MLPGenome.GENE_MIN, MLPGenome.GENE_MAX)
 
     @classmethod
-    def random(cls, length=None, hidden_size=None):
+    def random(cls, length=None, hidden_size=None, output_size=None):
         hidden_size = hidden_size or cls.HIDDEN_SIZE
-        length = length or cls.genome_length_for(hidden_size)
+        output_size = output_size or cls.DEFAULT_OUTPUT_SIZE
+        length = length or cls.genome_length_for(
+            hidden_size,
+            output_size,
+        )
 
         alpha_size = hidden_size
         network_parameter_count = length - alpha_size
@@ -68,15 +61,20 @@ class MLPGenome(Genome):
             [0.0] * alpha_size
         )
 
-        return cls(genes, hidden_size=hidden_size)
+        return cls(
+            genes,
+            hidden_size=hidden_size,
+            output_size=output_size,
+        )
 
     @classmethod
-    def genome_length_for(cls, hidden_size):
+    def genome_length_for(cls, hidden_size, output_size=None):
+        output_size = output_size or cls.DEFAULT_OUTPUT_SIZE
         return (
             cls.INPUT_SIZE * hidden_size
             + hidden_size
-            + hidden_size * cls.OUTPUT_SIZE
-            + cls.OUTPUT_SIZE
+            + hidden_size * output_size
+            + output_size
             + hidden_size
         )
 
@@ -84,6 +82,7 @@ class MLPGenome(Genome):
         return MLPGenome(
             self.genes.copy(),
             hidden_size=self.hidden_size,
+            output_size=self.output_size,
         )
 
     def get_input_weights(self):
@@ -109,7 +108,7 @@ class MLPGenome(Genome):
 
         return self.genes[start:end].reshape(
             self.hidden_size,
-            self.OUTPUT_SIZE,
+            self.output_size,
         )
 
     def get_output_bias(self):

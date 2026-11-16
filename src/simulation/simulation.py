@@ -4,7 +4,7 @@ from agents import Agent
 
 import config
 
-from environment import FrozenLakeEnvironment
+from environment import Environment
 
 from .simulation_result import SimulationResult
 
@@ -18,7 +18,7 @@ class Simulation:
     def __init__(
         self,
         agent: Agent,
-        environment: FrozenLakeEnvironment,
+        environment: Environment,
         trace_context: str = ""
     ):
         self.agent = agent
@@ -44,7 +44,12 @@ class Simulation:
                 self.agent.trace_context = (
                     f"{self.trace_context} step={step_index}"
                 )
-            action = self.agent.act(observation)
+            action = self.agent.act(
+                observation,
+                agent_observation_index=(
+                    self.environment.get_agent_observation_index()
+                ),
+            )
 
             next_observation, reward, terminated, truncated = (
                 self.environment.step(action)

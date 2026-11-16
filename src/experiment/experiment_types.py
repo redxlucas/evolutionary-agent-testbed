@@ -14,6 +14,7 @@ class ExperimentType(Enum):
 class ExperimentOptimizer(Enum):
     GENETIC = "genetic"
     CROSS_ENTROPY = "cross_entropy"
+    DIFFERENTIAL_EVOLUTION = "differential_evolution"
 
 class ActivationFunction(Enum):
     NONE = "none"

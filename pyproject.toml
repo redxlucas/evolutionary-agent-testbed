@@ -7,6 +7,12 @@ name = "evolutionary-agent-testbed"
 version = "0.1.0"
 description = "Experimental testbed for evolutionary agents"
 requires-python = ">=3.13"
+dependencies = [
+    "gymnasium",
+    "minigrid",
+    "pygame",
+    "matplotlib",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

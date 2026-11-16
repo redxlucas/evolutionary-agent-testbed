@@ -12,7 +12,7 @@ from evolution import (
     Selection,
 )
 
-from environment import FrozenLakeEnvironment
+from environment import Environment, create_environment
 
 from simulation import Simulation
 from utils import Logger
@@ -36,6 +36,7 @@ class GeneticAlgorithm:
         logger: Logger,
         elite_size: int = 0,
         evolve: bool = True,
+        stop_event=None,
     ):
         self.metrics: list[GenerationMetrics] = []
 
@@ -45,6 +46,8 @@ class GeneticAlgorithm:
 
         self.generations = generations
         self.evolve = evolve
+        self.stop_event = stop_event
+        self.last_generation_candidates = []
 
         self.selection = Selection(
             tournament_size=tournament_size
@@ -69,16 +72,24 @@ class GeneticAlgorithm:
         """
         Runs the genetic algorithm and returns the generation metrics.
         """
-        environment = FrozenLakeEnvironment()
+        environment = create_environment()
 
         try:
             for generation in range(self.generations):
+                if self.stop_event is not None and self.stop_event.is_set():
+                    break
+
                 self.logger.debug(
                     "Starting generation | generation=%d",
                     generation
                 )
 
-                self._evaluate_population(environment, generation)
+                if not self._evaluate_population(environment, generation):
+                    break
+
+                self.last_generation_candidates = list(
+                    self.population.individuals
+                )
 
                 generation_metrics = self._collect_generation_metrics(
                     population=self.population,
@@ -87,7 +98,10 @@ class GeneticAlgorithm:
 
                 self.metrics.append(generation_metrics)
 
-                if self.evolve:
+                if self.evolve and not (
+                    self.stop_event is not None
+                    and self.stop_event.is_set()
+                ):
                     self._evolve_population()
 
             return self.metrics
@@ -97,14 +111,16 @@ class GeneticAlgorithm:
 
     def _evaluate_population(
         self,
-        environment: FrozenLakeEnvironment,
+        environment: Environment,
         generation: int,
-    ):
+    ) -> bool:
         """
         Evaluates the fitness of all individuals in the population.
         """
 
         for individual_index, genome in enumerate(self.population):
+            if self.stop_event is not None and self.stop_event.is_set():
+                return False
 
             trace_context = (
                 f"generation={generation} individual={individual_index}"
@@ -137,6 +153,8 @@ class GeneticAlgorithm:
                 genome.fitness,
                 result.success,
             )
+
+        return True
 
     def _collect_generation_metrics(
         self,

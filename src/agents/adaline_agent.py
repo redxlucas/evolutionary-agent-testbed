@@ -15,15 +15,31 @@ class AdalineAgent:
         self.weights = weights
         self.bias = bias
         self.trace_context = ""
+        self._input_indices_cache = {}
 
     def reset(self):
         pass
 
-    def act(self, observation):
+    def act(self, observation, agent_observation_index=None):
         """
         Selects an action based on the given observation.
         """
-        inputs = np.delete(observation.flatten(), observation.size // 2)
+        if agent_observation_index is None:
+            agent_observation_index = observation.size // 2
+        cache_key = (observation.size, agent_observation_index)
+        input_indices = self._input_indices_cache.get(cache_key)
+        if input_indices is None:
+            if not 0 <= agent_observation_index < observation.size:
+                raise ValueError(
+                    "Agent observation index is outside the observation."
+                )
+            input_indices = np.concatenate((
+                np.arange(agent_observation_index),
+                np.arange(agent_observation_index + 1, observation.size),
+            ))
+            self._input_indices_cache[cache_key] = input_indices
+
+        inputs = observation.ravel()[input_indices]
         outputs = self.predict(inputs)
         action = int(np.argmax(outputs))
 

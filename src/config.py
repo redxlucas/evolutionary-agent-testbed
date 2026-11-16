@@ -4,28 +4,31 @@ DEFAULT_MAP_SIZE = "4x4"
 RENDER_MODE = None
 
 OBSERVATION_SIZE = 3
-NUM_MOVEMENTS = 4
 
 BORDER_WIDTH = 1
 
 EMPTY_CELL_VALUE = 0
+UNSEEN_CELL_VALUE = -0.25
 HOLE_CELL_VALUE = -1
 GOAL_CELL_VALUE = 1
 BORDER_CELL_VALUE = -0.5
 
 # Experiment
 
-EXPERIMENT_TYPE = "mlp"
+EXPERIMENT_TYPE = "movement"
 EXPERIMENT_MODE = "single"
-EXPERIMENT_OPTIMIZER = "cross_entropy"
+EXPERIMENT_OPTIMIZER = "genetic"
+ENVIRONMENT_TYPE = "frozen_lake"
 
 EXPERIMENT_RUNS = 30
-MLP_HIDDEN_SIZES = (8,)
+MLP_HIDDEN_SIZES = (8,16,24)
+# "relu", "leaky_relu" (fixed alpha=0.25), and "prelu" (evolved alpha).
+MLP_ACTIVATION_FUNCTION = "relu"
 
 # Reproducibility and execution
 
 SEED = 42
-WORKERS = 4
+WORKERS = 8
 LOG_LEVEL = "INFO"
 
 # Cross-Entropy Method
@@ -33,12 +36,17 @@ LOG_LEVEL = "INFO"
 CEM_INITIAL_STD = 1.0
 CEM_MIN_STD = 1e-3
 
+# Differential Evolution
+
+DE_MUTATION_FACTOR_RANGE = (0.0, 1.0)
+DE_CROSSOVER_RATE_RANGE = (0.0, 1.0)
+
 # Population
 
 POPULATION_SIZE = 200
-GENERATIONS = 200
+GENERATIONS = 100
 MAX_STEPS = 50
-GENOME_LENGTH = 100
+GENOME_LENGTH = 50
 
 # Selection
 
@@ -47,7 +55,7 @@ SELECTION_AMOUNT = 30
 
 # Elitism
 
-ELITE_SIZE = 100
+ELITE_SIZE = int(POPULATION_SIZE / 2)
 
 # Crossover
 

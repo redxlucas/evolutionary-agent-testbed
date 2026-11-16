@@ -1,7 +1,7 @@
 import numpy as np
 
 from agents.genome import Genome
-from environment import FrozenLakeEnvironment
+from environment import Environment, create_environment
 from evolution import FitnessEvaluator, GenerationMetrics
 from simulation import Simulation
 from utils import Logger
@@ -31,6 +31,7 @@ class CrossEntropyOptimizer:
         initial_std: float = 1.0,
         min_std: float = 1e-3,
         seed: int | None = None,
+        stop_event=None,
     ):
         if population_size <= 0:
             raise ValueError(
@@ -80,6 +81,7 @@ class CrossEntropyOptimizer:
         self.min_std = min_std
 
         self.logger = logger
+        self.stop_event = stop_event
 
         self.rng = np.random.default_rng(seed)
 
@@ -91,6 +93,10 @@ class CrossEntropyOptimizer:
 
         self.metrics: list[GenerationMetrics] = []
 
+        # Retain the evaluated population from the final iteration so the
+        # experiment runner can report per-seed outcomes after training.
+        self.last_generation_candidates: list[Genome] = []
+
         self.best_genome: Genome | None = None
         self.best_fitness = float("-inf")
 
@@ -98,10 +104,13 @@ class CrossEntropyOptimizer:
         """
         Runs the Cross-Entropy optimization process.
         """
-        environment = FrozenLakeEnvironment()
+        environment = create_environment()
 
         try:
             for iteration in range(self.iterations):
+                if self.stop_event is not None and self.stop_event.is_set():
+                    break
+
                 self.logger.debug(
                     "Starting CEM iteration | iteration=%d",
                     iteration,
@@ -109,11 +118,15 @@ class CrossEntropyOptimizer:
 
                 candidates = self._sample_population()
 
-                self._evaluate_population(
+                population_complete = self._evaluate_population(
                     candidates=candidates,
                     environment=environment,
                     iteration=iteration,
                 )
+                if not population_complete:
+                    break
+
+                self.last_generation_candidates = candidates
 
                 generation_metrics = (
                     self._collect_generation_metrics(
@@ -162,14 +175,17 @@ class CrossEntropyOptimizer:
     def _evaluate_population(
         self,
         candidates: list[Genome],
-        environment: FrozenLakeEnvironment,
+        environment: Environment,
         iteration: int,
-    ):
+    ) -> bool:
         """
         Evaluates all sampled candidates using the existing simulation
         and fitness evaluation pipeline.
         """
         for candidate_index, genome in enumerate(candidates):
+            if self.stop_event is not None and self.stop_event.is_set():
+                return False
+
             trace_context = (
                 f"iteration={iteration} "
                 f"individual={candidate_index}"
@@ -204,6 +220,8 @@ class CrossEntropyOptimizer:
                 genome.fitness,
                 result.success,
             )
+
+        return True
 
     def _select_by_roulette(
         self,
